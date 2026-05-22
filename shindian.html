@@ -2619,6 +2619,11 @@ function renderStats(){
     _time: fmtTime(b.time) || String(b.time||'').trim()
   }));
 
+  // DEBUG：印出比對資料，確認格式是否一致
+  console.log('[renderStats] ds（日期列表）:', ds);
+  console.log('[renderStats] normalizedBookings sample:', normalizedBookings.slice(0,5).map(b=>({raw_date:b.date, _date:b._date, raw_time:b.time, _time:b._time})));
+  if(p.slots) console.log('[renderStats] slots keys sample:', Object.keys(p.slots).slice(0,3));
+
   ds.forEach(d => {
     // 取得這天的時段（從 slots 取出，並用 fmtTime 正規化）
     const slotsOfDay = p.slots?.[d] || {};
