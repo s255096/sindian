@@ -1,0 +1,2999 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)https://crimson-base-8091.tiffany88070660.workers.dev/ -->
+<html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新店耕莘醫院 巡檢中心體檢預約系統</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&display=swap');
+:root{
+  /* 主色：雲白藍 */
+  --teal-50:#FAFCFE;--teal-100:#EAF3F9;--teal-200:#D2E7F3;--teal-400:#A8D0E8;--teal-600:#80B5D6;--teal-800:#5A92B4;
+  /* 強調：雲白粉 */
+  --pink-50:#FEF9FB;--pink-100:#FCEEF3;--pink-200:#F6D8E3;--pink-400:#ECC0CE;--pink-600:#DFA0B4;--pink-800:#C07890;
+  /* 中性 */
+  --gray-50:#FEFEFE;--gray-100:#F5F3F6;--gray-200:#E8E4EA;--gray-400:#B0A8B4;--gray-600:#837A88;--gray-800:#3E3844;
+  /* 警示 */
+  --amber-50:#FFFCF7;--amber-100:#FEF2DC;--amber-400:#F5C88A;--amber-600:#C8881A;
+  --red-50:#FFF6F6;--red-400:#ECA8A8;--red-600:#C06060;
+  --blue-50:#FAFCFE;--blue-400:#A8D0E8;--blue-600:#80B5D6;--blue-800:#5A92B4;
+  --font:'Noto Sans TC',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#ffffff;color:var(--gray-800);min-height:100vh;}
+/* ── Shell ── */
+.shell{display:grid;grid-template-columns:260px 1fr;grid-template-rows:64px 1fr;min-height:100vh;}
+/* ── Topbar ── */
+.topbar{grid-column:1/-1;background:#fff;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;padding:0 1.5rem;gap:1rem;z-index:10;}
+.logo{font-family:'DM Serif Display',serif;font-size:21px;color:#1A2E4A;letter-spacing:-.5px;white-space:nowrap;}
+.logo span{font-family:var(--font);font-size:12px;font-weight:300;color:var(--gray-400);margin-left:8px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.ppill{display:flex;align-items:center;gap:6px;background:var(--teal-50);border:1px solid var(--teal-100);border-radius:20px;padding:5px 12px;cursor:pointer;transition:.2s;}
+.ppill:hover{background:var(--teal-100);}
+.pdot{width:8px;height:8px;border-radius:50%;}
+.pname{font-size:13px;color:var(--teal-800);font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ubadge{display:flex;align-items:center;gap:8px;background:var(--gray-50);border:1px solid var(--gray-100);border-radius:20px;padding:5px 14px;}
+.ubname{font-size:13px;color:var(--gray-800);font-weight:500;}
+.ubrole{font-size:11px;color:var(--gray-400);}
+.logout-btn{padding:5px 12px;border-radius:16px;border:1.5px solid var(--gray-200);background:transparent;color:var(--gray-600);font-family:var(--font);font-size:12px;cursor:pointer;}
+.logout-btn:hover{background:var(--gray-100);}
+/* ── Sidebar ── */
+.sidebar{background:#ffffff;border-right:1px solid #F0EDE8;display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-top{padding:1rem;}
+.npbtn{width:100%;padding:9px;border:1.5px dashed var(--teal-200);border-radius:8px;background:var(--teal-50);color:var(--teal-600);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.npbtn:hover{background:var(--teal-100);}
+.ss{padding:.5rem 1rem .25rem;font-size:11px;font-weight:500;color:var(--gray-400);letter-spacing:.08em;text-transform:uppercase;}
+.plist{overflow-y:auto;padding:0 .5rem .5rem;}
+.pitem{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:.15s;margin-bottom:2px;}
+.pitem:hover{background:var(--gray-50);}
+.pitem.active{background:var(--teal-50);}
+.pc{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.pn{font-size:13px;color:var(--gray-800);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pitem.active .pn{color:var(--teal-600);font-weight:500;}
+.pbadge{font-size:11px;background:var(--gray-100);color:var(--gray-600);padding:2px 7px;border-radius:8px;}
+.pitem.active .pbadge{background:var(--teal-100);color:var(--teal-600);}
+.sdiv{height:1px;background:var(--gray-100);margin:.5rem 1rem;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;font-size:13px;color:var(--gray-600);cursor:pointer;border-left:3px solid transparent;transition:.15s;}
+.nav-item:hover{background:#F4F2EE;color:#1A2E4A;}
+.nav-item.active{background:#F2FAF8;color:#226B5E;border-left-color:#5BBFAB;font-weight:500;}
+.ni{font-size:15px;width:18px;text-align:center;}
+/* ── Main ── */
+.main{padding:1.75rem 2rem;overflow-y:auto;}
+.page{display:none;}.page.active{display:block;}
+.ph{margin-bottom:1.5rem;}
+.pt{font-size:21px;font-weight:500;margin-bottom:3px;}
+.ps{font-size:13px;color:var(--gray-600);}
+/* ── Cards ── */
+.card{background:#fff;border-radius:12px;border:0.5px solid var(--gray-200);padding:1.4rem;margin-bottom:1.25rem;}
+.ct{font-size:14px;font-weight:500;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:7px;}
+/* ── Projects grid ── */
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.pcard{background:#fff;border-radius:12px;border:0.5px solid var(--gray-200);padding:1.25rem;cursor:pointer;transition:.2s;position:relative;overflow:hidden;}
+.pcard:hover{border-color:var(--teal-200);transform:translateY(-2px);box-shadow:0 4px 16px rgba(15,110,86,.1);}
+.pcard-accent{position:absolute;top:0;left:0;right:0;height:4px;}
+.padd{background:#fff;border:1px dashed var(--teal-200);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:160px;color:var(--gray-400);}
+.padd:hover{border-color:var(--teal-200);background:var(--teal-50);color:var(--teal-600);}
+/* ── Forms ── */
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.fr.s{grid-template-columns:1fr;}
+.fg{display:flex;flex-direction:column;gap:6px;}
+label{font-size:13px;font-weight:500;color:var(--gray-600);}
+input[type=text],input[type=email],input[type=date],input[type=number],input[type=tel],input[type=url],input[type=password],select,textarea{padding:9px 12px;border:1px solid var(--gray-200);border-radius:8px;font-family:var(--font);font-size:14px;color:var(--gray-800);background:#fff;transition:border .15s;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--teal-400);box-shadow:0 0 0 3px rgba(29,158,117,.12);}
+textarea{resize:vertical;min-height:80px;}
+/* ── Buttons ── */
+.btn{padding:9px 18px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:#3A9E8E;color:#fff;}
+.btn-primary:hover{background:#226B5E;}
+.btn-secondary{background:#fff;color:var(--gray-600);border:1px solid var(--gray-200);}
+.btn-secondary:hover{background:var(--gray-50);}
+.btn-danger{background:var(--red-50);color:var(--red-600);border:1px solid #F7C1C1;}
+.btn-danger:hover{background:#F7C1C1;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+/* ── Slot config ── */
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:.75rem;}
+.si{background:var(--gray-50);border:1px solid var(--gray-100);border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sci{width:60px;text-align:center;padding:4px 8px;font-size:13px;}
+/* ── Badges ── */
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:500;}
+.bs{background:#F2FAF8;color:#3A9E8E;}
+.bw{background:var(--amber-50);color:var(--amber-600);}
+.bd{background:var(--red-50);color:var(--red-600);}
+/* ── Stats ── */
+.sr{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
+.sc{background:#fff;border-radius:10px;border:1px solid var(--gray-100);padding:1rem 1.2rem;}
+.sl{font-size:11px;color:var(--gray-400);font-weight:500;margin-bottom:5px;}
+.sv{font-size:24px;font-weight:500;line-height:1;}
+.sv.teal{color:var(--teal-600);}.sv.amber{color:var(--amber-600);}
+/* ── Table ── */
+.dt{width:100%;border-collapse:collapse;font-size:13px;}
+.dt th{text-align:left;padding:10px 14px;background:var(--gray-50);font-weight:500;font-size:12px;color:var(--gray-600);border-bottom:1px solid var(--gray-100);}
+.dt td{padding:9px 14px;border-bottom:1px solid var(--gray-50);}
+.dt tr:last-child td{border-bottom:none;}
+.dt tr:hover td{background:var(--gray-50);}
+/* ── Date/Time picker ── */
+.dg{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;}
+.dc{background:#fff;border:1.5px solid var(--gray-200);border-radius:10px;padding:11px 16px;text-align:center;cursor:pointer;transition:.15s;min-width:72px;}
+.dc:hover{border-color:var(--teal-400);background:var(--teal-50);}
+.dc.sel{border-color:var(--teal-600);background:var(--teal-50);}
+.dc .wd{font-size:10px;color:var(--gray-400);font-weight:500;text-transform:uppercase;margin-bottom:3px;}
+.dc .dn{font-size:20px;font-weight:500;color:var(--gray-800);line-height:1;}
+.dc .dm{font-size:10px;color:var(--gray-400);margin-top:2px;}
+.dc.sel .dn{color:var(--teal-600);}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px;margin-bottom:1.5rem;}
+.tb{background:#fff;border:1.5px solid var(--gray-200);border-radius:8px;padding:10px 8px;cursor:pointer;font-family:var(--font);transition:.15s;text-align:center;}
+.tb:hover:not(:disabled){border-color:var(--teal-400);background:var(--teal-50);}
+.tb.sel{border-color:var(--teal-600);background:var(--teal-50);}
+.tb:disabled{opacity:.5;cursor:not-allowed;background:var(--gray-50);}
+.tsl{font-size:13px;font-weight:500;}.tav{font-size:11px;margin-top:3px;}
+.aok{color:var(--teal-600);}.afw{color:var(--amber-600);}.afl{color:var(--red-600);}
+.cb{height:4px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:5px;}
+.cbf{height:100%;border-radius:4px;}
+/* ── Steps ── */
+.steps{display:flex;align-items:center;margin-bottom:2rem;}
+.step{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--gray-400);}
+.snum{width:26px;height:26px;border-radius:50%;border:2px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;}
+.step.active .snum{border-color:var(--teal-600);background:var(--teal-600);color:#fff;}
+.step.active{color:var(--teal-600);font-weight:500;}
+.step.done .snum{border-color:var(--teal-600);background:var(--teal-50);color:var(--teal-600);}
+.step.done{color:var(--gray-600);}
+.sdivr{flex:1;height:1.5px;background:var(--gray-100);margin:0 8px;max-width:60px;}
+/* ── Alerts ── */
+.alert{padding:10px 13px;border-radius:8px;font-size:13px;margin-bottom:1rem;}
+.ai{background:var(--blue-50);color:var(--blue-800);border:1px solid #B5D4F4;}
+.aw{background:var(--amber-50);color:var(--amber-600);border:1px solid #FAC775;}
+.as{background:var(--teal-50);color:var(--teal-800);border:1px solid var(--teal-100);}
+/* ── Email ── */
+.ep{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;}
+.eh{background:var(--teal-600);padding:1.1rem 1.4rem;color:#fff;}
+.eh h3{font-size:15px;font-weight:500;margin-bottom:3px;}
+.eh p{font-size:12px;opacity:.8;}
+.eb{padding:1.1rem 1.4rem;font-size:13px;color:var(--gray-800);line-height:1.9;}
+/* ── Success ── */
+.succ{text-align:center;padding:2.5rem 1.5rem;}
+.sicon{width:60px;height:60px;background:var(--teal-50);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:26px;}
+.stitle{font-size:19px;font-weight:500;margin-bottom:6px;}
+.ssub{font-size:13px;color:var(--gray-600);}
+/* ── Modal ── */
+.mbd{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
+.mbd.open{display:flex;}
+.modal{background:#fff;border-radius:14px;padding:1.75rem;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;margin:1rem;}
+.mtitle{font-size:17px;font-weight:500;margin-bottom:1.25rem;}
+.mact{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;}
+/* ── Login ── */
+#login-screen{position:fixed;inset:0;background:#ffffff;overflow:hidden;display:flex;align-items:center;justify-content:center;z-index:500;}
+#login-screen.hidden{display:none;}
+.lwrap{width:100%;max-width:420px;padding:1rem;}
+.lcard{background:rgba(255,255,255,0.92);border-radius:20px;padding:2.5rem 2rem;border:0.5px solid #E6E2DA;backdrop-filter:blur(4px);}
+.llogo{text-align:center;margin-bottom:1.75rem;}
+.llogo-icon{width:56px;height:56px;background:var(--teal-50);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:26px;}
+.llogo h1{font-family:'DM Serif Display',serif;font-size:22px;color:#1A2E4A;letter-spacing:-.3px;letter-spacing:-.5px;}
+.llogo p{font-size:13px;color:var(--gray-400);margin-top:3px;}
+.lform .lfg{margin-bottom:1rem;}
+.lform label{font-size:13px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:6px;}
+.lsubmit{width:100%;padding:12px;border:none;border-radius:10px;background:#3A9E8E;color:#fff;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;margin-top:.5rem;}
+.lsubmit:hover{background:#226B5E;}
+.lerr{background:var(--red-50);color:var(--red-600);border:1.5px solid #F7C1C1;border-radius:8px;padding:11px 14px;font-size:13px;margin-bottom:1rem;display:none;font-weight:500;animation:shake .35s ease-in-out;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.lhint{font-size:12px;color:var(--gray-400);text-align:center;margin-top:1rem;line-height:1.7;}
+.admin-link{display:block;text-align:center;margin-top:1.25rem;font-size:12px;color:var(--gray-400);cursor:pointer;}
+.admin-link:hover{color:var(--gray-600);}
+.adm-mbd{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;align-items:center;justify-content:center;}
+.adm-mbd.open{display:flex;}
+.adm-modal{background:#fff;border-radius:16px;padding:2rem 1.75rem;width:100%;max-width:380px;margin:1rem;}
+/* ── Loading overlay ── */
+#gs-loading{position:fixed;inset:0;background:#A8D8CC;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:600;gap:1.25rem;transition:opacity .4s;overflow:hidden;}
+#gs-loading.hidden{opacity:0;pointer-events:none;}
+#gs-loading.gone{display:none;}
+.boot-logo{text-align:center;}
+.boot-logo-icon{width:60px;height:60px;background:rgba(255,255,255,.2);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:28px;}
+.boot-logo h1{font-family:'DM Serif Display',serif;font-size:24px;color:#ffffff;letter-spacing:-.5px;}
+.boot-logo p{font-size:13px;color:rgba(255,255,255,.8);margin-top:4px;}
+.boot-spinner{width:32px;height:32px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#ffffff;border-radius:50%;animation:spin .8s linear infinite;}
+.boot-msg{font-size:13px;color:rgba(255,255,255,.75);}
+.boot-err{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:12px 16px;font-size:13px;color:#fff;text-align:center;min-width:240px;display:none;}
+.boot-retry-btn{margin-top:8px;padding:8px 20px;background:#fff;color:#3A9E8E;border:none;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* ── Color swatches ── */
+.cos{display:flex;gap:8px;margin-top:4px;}
+.csw{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;}
+.csw.sel{border-color:var(--gray-800);}
+/* ── PM Toggle ── */
+.toggle-track{width:40px;height:22px;border-radius:11px;background:var(--gray-200);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+/* ── Qgate ── */
+.qgate{background:#fff;border-radius:16px;border:2px solid var(--pink-200);padding:2rem;max-width:560px;margin:2rem auto;}
+.qgate-icon{font-size:48px;text-align:center;margin-bottom:1rem;}
+.qgate-title{font-size:19px;font-weight:600;text-align:center;margin-bottom:.5rem;}
+.qgate-sub{font-size:14px;color:var(--gray-600);text-align:center;margin-bottom:1.5rem;line-height:1.7;}
+.qbadge{display:block;width:fit-content;margin:0 auto 1.5rem;background:var(--pink-50);border:1px solid var(--pink-100);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--pink-600);}
+.qsteps{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
+.qstep{display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--gray-50);border-radius:10px;}
+.qstep-num{width:28px;height:28px;border-radius:50%;background:var(--pink-600);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;}
+.qstep-text{font-size:13px;color:var(--gray-800);line-height:1.6;}
+.qstep-text strong{display:block;font-weight:500;margin-bottom:2px;}
+.qactions{display:flex;flex-direction:column;gap:8px;}
+.btn-qlink{background:var(--pink-600);color:#fff;border:none;padding:12px 20px;border-radius:10px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;}
+.q-confirm-row{display:flex;align-items:center;gap:10px;background:var(--teal-50);border:1px solid var(--teal-100);border-radius:10px;padding:12px 14px;display:none;}
+.q-confirm-row input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--teal-600);}
+/* ── Misc ── */
+.fb{display:flex;align-items:center;justify-content:space-between;}
+.fg2{display:flex;align-items:center;gap:8px;}
+.mt1{margin-top:.75rem;}.mt2{margin-top:1.25rem;}
+.tsm{font-size:13px;}.tm{color:var(--gray-400);}
+hr.d{border:none;border-top:1px solid var(--gray-100);margin:1.25rem 0;}
+body.emode .sidebar{display:none;}
+body.emode .shell{grid-template-columns:1fr;}
+body.emode .main{max-width:800px;margin:0 auto;}
+
+/* ── Employee Home ── */
+.emp-home{max-width:560px;margin:0 auto;padding-top:.5rem;}
+.emp-booking-card{background:#fff;border-radius:16px;border:2px solid var(--teal-100);padding:1.5rem;margin-bottom:1.25rem;}
+.emp-booking-card.has-booking{border-color:var(--teal-200);}
+.emp-booking-header{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;}
+.emp-booking-avatar{width:48px;height:48px;border-radius:50%;background:var(--teal-50);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.emp-booking-title{font-size:17px;font-weight:500;color:var(--gray-800);}
+.emp-booking-sub{font-size:13px;color:var(--gray-400);margin-top:2px;}
+.emp-info-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--gray-50);border-radius:8px;margin-bottom:8px;font-size:13px;}
+.emp-info-label{color:var(--gray-400);min-width:60px;font-size:12px;}
+.emp-info-value{color:var(--gray-800);font-weight:500;flex:1;}
+.emp-no-booking{text-align:center;padding:2rem 1rem;}
+.emp-no-icon{font-size:36px;margin-bottom:.75rem;}
+.emp-no-title{font-size:15px;font-weight:500;color:var(--gray-800);margin-bottom:.5rem;}
+.emp-no-sub{font-size:13px;color:var(--gray-400);line-height:1.6;margin-bottom:1.25rem;}
+.emp-nav-tabs{display:flex;gap:8px;margin-bottom:1.5rem;}
+.emp-tab{flex:1;padding:10px;border:1.5px solid var(--gray-200);border-radius:10px;background:#fff;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:.15s;text-align:center;color:var(--gray-600);}
+.emp-tab:hover{border-color:var(--teal-400);background:var(--teal-50);color:var(--teal-600);}
+.emp-tab.active{border-color:var(--teal-600);background:var(--teal-50);color:var(--teal-600);}
+/* ── GS Setup banner ── */
+.gs-setup-banner{background:var(--blue-50);border:1.5px solid var(--teal-100);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;}
+.gs-setup-banner h3{font-size:15px;font-weight:500;color:var(--blue-600);margin-bottom:.5rem;}
+.gs-setup-banner p{font-size:13px;color:var(--blue-600);line-height:1.7;}
+.gs-url-row{display:flex;gap:8px;margin-top:.75rem;}
+</style>
+</head>
+<body>
+
+<!-- Boot Loading Screen -->
+<div id="gs-loading" class="hidden gone">
+
+  <div class="boot-logo">
+    <div class="boot-logo-icon">🏥</div>
+    <h1>新店耕莘醫院</h1>
+    <p>巡檢中心體檢預約系統</p>
+  </div>
+  <div class="boot-spinner"></div>
+  <div class="boot-msg" id="boot-msg">連線中…</div>
+  <div class="boot-err" id="boot-err" style="display: none;">
+    <div id="boot-err-msg">無法連線 Google Sheets</div>
+    <button class="boot-retry-btn" onclick="appInit()">🔄 重試</button>
+  </div>
+</div>
+
+<!-- Login Screen -->
+<div id="login-screen" class="">
+  <!-- 裝飾：左上粉紅 blob（淡） -->
+  <svg style="position:absolute;top:-80px;left:-100px;width:400px;height:380px;opacity:.18;pointer-events:none" viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg">
+    <path d="M190,25 C260,12 350,70 365,155 C380,240 325,315 245,340 C165,365 70,325 35,240 C0,155 40,70 115,40 C143,28 168,28 190,25Z" fill="#ED8A86"></path>
+  </svg>
+  <!-- 裝飾：右下薄荷 blob（淡） -->
+  <svg style="position:absolute;bottom:-60px;right:-80px;width:360px;height:320px;opacity:.15;pointer-events:none" viewBox="0 0 360 320" xmlns="http://www.w3.org/2000/svg">
+    <path d="M170,18 C230,8 310,55 325,130 C340,205 295,270 220,295 C145,320 60,285 28,210 C-4,135 25,60 90,32 C118,20 146,24 170,18Z" fill="#5BBFAB"></path>
+  </svg>
+  <!-- 裝飾：右上點點 -->
+  <svg style="position:absolute;top:30px;right:30px;width:100px;height:100px;opacity:.18;pointer-events:none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="15" cy="15" r="5" fill="#5BBFAB"></circle><circle cx="35" cy="15" r="5" fill="#5BBFAB"></circle><circle cx="55" cy="15" r="5" fill="#5BBFAB"></circle>
+    <circle cx="15" cy="35" r="5" fill="#5BBFAB"></circle><circle cx="35" cy="35" r="5" fill="#5BBFAB"></circle><circle cx="55" cy="35" r="5" fill="#5BBFAB"></circle>
+    <circle cx="15" cy="55" r="5" fill="#5BBFAB"></circle><circle cx="35" cy="55" r="5" fill="#5BBFAB"></circle><circle cx="55" cy="55" r="5" fill="#5BBFAB"></circle>
+  </svg>
+  <!-- 裝飾：粉空心圓 -->
+  <svg style="position:absolute;bottom:15%;left:8%;width:70px;height:70px;opacity:.18;pointer-events:none" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="35" cy="35" r="30" fill="none" stroke="#ED8A86" stroke-width="3"></circle>
+  </svg>
+  <div class="lwrap" style="position:relative;z-index:1">
+    <div class="lcard">
+      <div class="llogo">
+        <div class="llogo-icon">🏥</div>
+        <h1>新店耕莘醫院</h1>
+        <p>巡檢中心體檢預約系統</p>
+      </div>
+      <div class="lerr" id="lerr"></div>
+      <div class="lform">
+        <div class="lfg">
+          <label>員工編號</label>
+          <input type="text" id="emp-login-id" placeholder="請輸入員工編號" autocomplete="off" onkeydown="if(event.key===&#39;Enter&#39;)document.getElementById(&#39;emp-login-bday&#39;).focus()">
+        </div>
+        <div class="lfg">
+          <label>出生年月日</label>
+          <input type="text" id="emp-login-bday" placeholder="例：19900523" maxlength="8" autocomplete="off" onkeydown="if(event.key===&#39;Enter&#39;)doEmpLogin()">
+        </div>
+        <!-- 帶出結果區（驗證後顯示） -->
+        <div id="emp-verify-result" style="display:none;background:var(--teal-50);border:1px solid var(--teal-100);border-radius:10px;padding:12px 14px;margin-bottom:1rem;">
+          <div style="font-size:12px;color:var(--teal-600);font-weight:500;margin-bottom:6px">✅ 身份驗證成功</div>
+          <div style="font-size:14px;font-weight:500;color:var(--gray-800)" id="verify-name">—</div>
+          <div style="font-size:12px;color:var(--gray-600);margin-top:2px" id="verify-proj">—</div>
+          <div id="verify-multi-sel" style="display:none;margin-top:8px">
+            <div style="font-size:12px;color:var(--gray-600);margin-bottom:4px">您有多個體檢活動，請選擇：</div>
+            <select id="verify-proj-sel" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--gray-200);border-radius:7px;"></select>
+          </div>
+        </div>
+        <button class="lsubmit" id="emp-verify-btn" onclick="verifyAndLogin()">驗證身份 →</button>
+        <div class="lhint">請輸入員工編號及出生年月日驗證身份<br>每位員工每個活動僅限預約一次</div>
+      </div>
+      <a class="admin-link" onclick="openAdmLogin()" style="display: none;">管理員入口</a>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div class="adm-mbd" id="adm-mbd">
+  <div class="adm-modal">
+    <div class="mtitle">⚙️ 管理員登入</div>
+    <div class="lerr" id="adm-lerr"></div>
+    <div class="lform">
+      <div class="lfg"><label>帳號</label><input type="text" id="adm-user" placeholder="管理員帳號" autocomplete="username"></div>
+      <div class="lfg"><label>密碼</label><input type="password" id="adm-pass" placeholder="密碼" onkeydown="if(event.key===&#39;Enter&#39;)doAdmLogin()"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem;">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeM(&#39;adm-mbd&#39;)">取消</button>
+      <button class="btn btn-primary" style="flex:2" onclick="doAdmLogin()">登入後台 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Project Modal -->
+<div class="mbd" id="modal-np">
+  <div class="modal">
+    <div class="mtitle">新增公司專案</div>
+    <div class="fr"><div class="fg"><label>公司名稱 *</label><input type="text" id="np-co" placeholder="例：台積電"></div><div class="fg"><label>活動名稱 *</label><input type="text" id="np-nm" placeholder="例：2025上半年健康檢查"></div></div>
+    <div class="fr s"><div class="fg"><label>體檢地點</label><input type="text" id="np-lo" placeholder="例：台北仁愛醫院 B2 健檢中心"></div></div>
+    <div class="fr"><div class="fg"><label>日期（起）</label><input type="date" id="np-s"></div><div class="fg"><label>日期（迄）</label><input type="date" id="np-e"></div></div>
+    <div class="fg" style="margin-bottom:0"><label>專案顏色</label>
+      <div class="cos" id="cos">
+        <div class="csw sel" data-c="#0F6E56" style="background:#0F6E56" onclick="pickC(this)"></div>
+        <div class="csw" data-c="#534AB7" style="background:#534AB7" onclick="pickC(this)"></div>
+        <div class="csw" data-c="#185FA5" style="background:#185FA5" onclick="pickC(this)"></div>
+        <div class="csw" data-c="#BA7517" style="background:#BA7517" onclick="pickC(this)"></div>
+        <div class="csw" data-c="#A32D2D" style="background:#A32D2D" onclick="pickC(this)"></div>
+        <div class="csw" data-c="#3C3489" style="background:#3C3489" onclick="pickC(this)"></div>
+      </div>
+    </div>
+    <div class="mact"><button class="btn btn-secondary" onclick="closeM(&#39;modal-np&#39;)">取消</button><button class="btn btn-primary" onclick="createProj()">建立專案</button></div>
+  </div>
+</div>
+
+<!-- Email Preview Modal -->
+<div class="mbd" id="modal-em">
+  <div class="modal"><div class="mtitle" id="em-t">信件預覽</div><div class="ep" id="em-b"></div><div class="mact"><button class="btn btn-secondary" onclick="closeM(&#39;modal-em&#39;)">關閉</button></div></div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="mbd" id="modal-chpw">
+  <div class="modal" style="max-width:400px">
+    <div class="mtitle">🔑 變更管理員密碼</div>
+    <div class="lerr" id="chpw-err"></div>
+    <div class="lform">
+      <div class="lfg"><label>目前密碼</label><input type="password" id="chpw-old"></div>
+      <div class="lfg"><label>新密碼</label><input type="password" id="chpw-new" placeholder="至少 6 個字元"></div>
+      <div class="lfg"><label>確認新密碼</label><input type="password" id="chpw-conf"></div>
+    </div>
+    <div class="mact"><button class="btn btn-secondary" onclick="closeM(&#39;modal-chpw&#39;)">取消</button><button class="btn btn-primary" onclick="savePassword()">變更密碼</button></div>
+  </div>
+</div>
+
+<!-- Main App Shell -->
+<div class="shell" id="app-shell" style="">
+<header class="topbar">
+  <div class="logo">新店耕莘醫院 <span>巡檢中心體檢預約系統</span></div>
+  <div class="topbar-right">
+    <div class="ppill" id="tp" onclick="showProjPage()" style="display:none">
+      <div class="pdot" id="tdot"></div>
+      <span class="pname" id="tname">—</span>
+      <span style="font-size:10px;color:var(--gray-400)">▼</span>
+    </div>
+    <div class="ubadge" id="ubadge" style="display:none">
+      <span style="font-size:16px" id="uavatar">👤</span>
+      <div><div class="ubname" id="ubname">—</div><div class="ubrole" id="ubrole">—</div></div>
+    </div>
+    <button class="logout-btn" id="logout-btn" onclick="doLogout()" style="display:none">登出</button>
+  </div>
+</header>
+
+<nav class="sidebar" id="sidebar" style="display:none">
+  <div class="sidebar-top"><button class="npbtn" onclick="openNP()">＋ 新增公司專案</button></div>
+  <div class="ss">專案列表</div>
+  <div class="plist" id="plist"></div>
+  <div class="sdiv"></div>
+  <div class="ss">當前專案</div>
+  <div class="nav-item active" id="nav-setup" onclick="showAdmin(&#39;setup&#39;)"><span class="ni">⚙️</span>活動設定</div>
+  <div class="nav-item" id="nav-bk" onclick="showAdmin(&#39;bk&#39;)"><span class="ni">📋</span>預約名單</div>
+  <div class="nav-item" id="nav-email" onclick="showAdmin(&#39;email&#39;)"><span class="ni">✉️</span>通知設定</div>
+  <div class="nav-item" id="nav-stats" onclick="showAdmin(&#39;stats&#39;)"><span class="ni">📊</span>統計總覽</div>
+  <div class="nav-item" id="nav-emp-list" onclick="showAdmin(&#39;emp-list&#39;)"><span class="ni">👥</span>員工名單</div>
+  <div class="sdiv"></div>
+  <div class="ss">系統</div>
+  <div class="nav-item" id="nav-sys" onclick="showSysPage()"><span class="ni">🔗</span>Google Sheets</div>
+  <div class="nav-item" onclick="openChpw()"><span class="ni">🔑</span>帳號管理</div>
+</nav>
+
+<main class="main">
+
+  <!-- GS Setup Required -->
+  <div class="page active" id="page-gs-setup">
+    <div class="gs-setup-banner">
+      <h3>⚠ 尚未設定 Google Sheets 連線</h3>
+      <p>本系統使用 Google Sheets 作為資料庫，所有專案設定與預約紀錄都存放於此。<br>請先填入您的 Apps Script 網址，完成初始化後即可使用。</p>
+      <div class="gs-url-row">
+        <input type="url" id="init-gs-url" placeholder="https://script.google.com/macros/s/xxxxxx/exec" style="flex:1">
+        <button class="btn btn-primary" onclick="initWithGsUrl()">連線並初始化 →</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">📝 尚未設定 Apps Script？</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.9">
+        1. 前往 Google 試算表 → 擴充功能 → Apps Script<br>
+        2. 貼上程式碼（請向系統提供者取得）→ 儲存<br>
+        3. 部署 → 新增部署作業 → 網頁應用程式 → 存取權選「所有人」<br>
+        4. 複製 /exec 結尾的網址貼到上方欄位
+      </div>
+    </div>
+  </div>
+
+
+  <!-- System Settings Page -->
+  <div class="page" id="page-sys">
+    <div class="ph"><div class="pt">系統設定</div><div class="ps">Google Sheets 連線設定，所有專案共用</div></div>
+    <div class="card">
+      <div class="ct">🔗 Google Sheets 連線</div>
+      <div class="alert ai">本系統所有資料（包含此網址）都存放於 Google Sheets，設定後任何裝置、任何瀏覽器開啟皆自動同步，無需重新填寫。</div>
+      <div class="fr">
+        <div class="fg">
+          <label>目前連線狀態</label>
+          <div id="gs-conn-status" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;color:var(--gray-400);background:var(--gray-50);">
+            <span id="gs-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--gray-300);flex-shrink:0"></span>
+            <span id="gs-status-text">檢查中…</span>
+          </div>
+        </div>
+        <div class="fg">
+          <label>操作</label>
+          <div style="display:flex;gap:8px;padding-top:2px;">
+            <button class="btn btn-secondary btn-sm" onclick="testGsConn()">🔌 測試連線</button>
+            <button class="btn btn-secondary btn-sm" onclick="reloadFromSheets()">🔄 重新載入資料</button>
+          </div>
+        </div>
+      </div>
+      <div class="fr s">
+        <div class="fg">
+          <label>Apps Script 網址 <span style="font-size:12px;color:var(--teal-600);font-weight:400">（已固定寫入系統）</span></label>
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;font-size:12px;font-family:monospace;color:var(--gray-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">https://script.google.com/macros/s/AKfycbw57WIlqDs-HtLy-W0QQej1RyCm94s1LhvMDzWmIRLM1yZ5FHn9SPVKM2P1YWZtehEp0g/exec</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">📋 初始化試算表</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.9;margin-bottom:1rem">
+        首次使用或需要重建試算表結構時，點擊下方按鈕。系統會自動在試算表建立 <code style="background:var(--gray-100);padding:1px 6px;border-radius:4px">projects</code>、<code style="background:var(--gray-100);padding:1px 6px;border-radius:4px">bookings</code>、<code style="background:var(--gray-100);padding:1px 6px;border-radius:4px">config</code> 三個分頁。
+      </div>
+      <button class="btn btn-secondary" onclick="initSheets()">🗂 初始化試算表分頁</button>
+    </div>
+  </div>
+
+  <!-- All Projects -->
+  <div class="page" id="page-proj">
+    <div class="ph fb">
+      <div><div class="pt">所有專案</div><div class="ps">管理各公司的體檢預約活動</div></div>
+      <button class="btn btn-primary" onclick="openNP()">＋ 新增專案</button>
+    </div>
+    <div class="pg" id="proj-grid"></div>
+  </div>
+
+  <!-- Setup -->
+  <div class="page" id="page-setup">
+    <div class="ph"><div class="pt" id="setup-title">活動設定</div><div class="ps" id="setup-sub">—</div></div>
+    <div class="card">
+      <div class="ct">📅 基本資訊</div>
+      <div class="fr"><div class="fg"><label>體檢活動名稱</label><input type="text" id="ev-name"></div><div class="fg"><label>公司名稱</label><input type="text" id="ev-co"></div></div>
+      <div class="fr"><div class="fg"><label>體檢地點</label><input type="text" id="ev-loc"></div><div class="fg"><label>聯絡窗口 Email</label><input type="email" id="ev-ct"></div></div>
+      <div class="fr"><div class="fg"><label>開放日期（起）</label><input type="date" id="ev-s" onchange="updateDateMode()"></div><div class="fg"><label>開放日期（迄）</label><input type="date" id="ev-e" onchange="updateDateMode()"></div></div>
+      <div class="fr" style="margin-top:-8px;margin-bottom:.75rem">
+        <div class="fg" style="flex:1">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--gray-700,#5F5E5A);font-weight:400;">
+            <input type="checkbox" id="ev-custom-dates" onchange="toggleCustomDates()" style="margin:0">
+            僅啟用部分日期（自訂可選擇的日期，例如非連續預約日）
+          </label>
+        </div>
+      </div>
+      <div id="ev-date-picker" style="display:none;margin-bottom:1rem;padding:14px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-100)">
+        <div style="font-size:13px;color:var(--gray-700,#5F5E5A);margin-bottom:8px">勾選要開放預約的日期：</div>
+        <div id="ev-date-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>上午場開始</label><input type="text" id="am-s" list="time-options" placeholder="08:00" onchange="genSlots()" oninput="genSlots()"></div>
+        <div class="fg"><label>上午場結束</label><input type="text" id="am-e" list="time-options" placeholder="12:00" onchange="genSlots()" oninput="genSlots()"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;padding:10px 14px;background:var(--gray-50);border-radius:8px;border:1px solid var(--gray-100);">
+        <div class="toggle-track" id="pm-track" onclick="togglePM()" style="z-index:10;position:relative;"><div class="toggle-thumb" id="pm-thumb" style="pointer-events:none;"></div></div>
+        <span style="font-size:13px;font-weight:500;color:var(--gray-800);cursor:pointer;" onclick="togglePM()">有下午場次</span>
+        <span style="font-size:12px;color:var(--gray-400)">關閉後下午場時段不會產生</span>
+      </div>
+      <div id="pm-fields" style="display:none">
+        <div class="fr">
+        <div class="fg"><label>下午場開始</label><input type="text" id="pm-s" list="time-options" placeholder="13:30" onchange="genSlots()" oninput="genSlots()"></div>
+        <div class="fg"><label>下午場結束</label><input type="text" id="pm-e" list="time-options" placeholder="17:00" onchange="genSlots()" oninput="genSlots()"></div>
+      </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>時段間隔</label><select id="ev-iv"><option value="15">每 15 分鐘</option><option value="30" selected="">每 30 分鐘</option><option value="60">每 60 分鐘</option></select></div>
+        <div class="fg"><label>每時段預設名額上限</label><input type="number" id="ev-cap" value="30" min="1"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">📋 線上問卷設定（伊克希曼）</div>
+      <div class="alert ai">員工必須先完成伊克希曼線上問卷，才能進行體檢預約。</div>
+      <div class="fr">
+        <div class="fg"><label>問卷功能</label><select id="q-enable"><option value="1">✅ 啟用問卷前置檢查</option><option value="0">❌ 停用（直接預約）</option></select></div>
+      </div>
+      <div class="fr s"><div class="fg"><label>伊克希曼問卷網址</label><input type="url" id="q-url" placeholder="https://examine.h2u.io/MobileRegister_tpshow/"></div></div>
+      <div class="fr s"><div class="fg"><label>問卷說明文字</label><textarea id="q-desc" rows="2">請先完成伊克希曼健檢線上問卷（約 5–10 分鐘），填寫完成後返回本頁面勾選確認，即可繼續預約。</textarea></div></div>
+    </div>
+
+    <div class="card">
+      <div class="ct">⚙️ 特殊職業問卷設定</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.7;margin-bottom:1rem">
+        啟用後，員工選完時段後會出現職業暴露相關題目，填答結果會記錄於預約資料中。
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;padding:10px 14px;background:var(--gray-50);border-radius:8px;border:1px solid var(--gray-100);">
+        <div class="toggle-track" id="sq-track" onclick="toggleSQ()" style="z-index:10;position:relative;"><div class="toggle-thumb" id="sq-thumb" style="pointer-events:none;"></div></div>
+        <span style="font-size:13px;font-weight:500;color:var(--gray-800);cursor:pointer;" onclick="toggleSQ()">啟用焊錫作業職業暴露問卷</span>
+      </div>
+      <div id="sq-preview" style="display:none;background:var(--blue-50);border:1px solid #B5D4F4;border-radius:10px;padding:1rem;font-size:13px;color:var(--blue-800);">
+        <div style="font-weight:500;margin-bottom:.75rem">📋 員工將看到以下題目：</div>
+        <div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border:1px solid #B5D4F4">
+          <div style="font-weight:500;margin-bottom:4px">第 1 題</div>
+          請問您的工作有焊錫作業嗎？
+          <div style="display:flex;gap:8px;margin-top:6px"><span style="background:var(--blue-50);border:1px solid #B5D4F4;border-radius:6px;padding:3px 12px;font-size:12px">有</span><span style="background:var(--blue-50);border:1px solid #B5D4F4;border-radius:6px;padding:3px 12px;font-size:12px">沒有</span></div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px 14px;border:1px solid #B5D4F4;opacity:.6">
+          <div style="font-weight:500;margin-bottom:4px">第 2 題 <span style="font-size:11px;color:var(--blue-600);font-weight:400">（回答「有」才顯示）</span></div>
+          請問您焊錫作業時，會接觸到「鉛」嗎？
+          <div style="display:flex;gap:8px;margin-top:6px"><span style="background:var(--blue-50);border:1px solid #B5D4F4;border-radius:6px;padding:3px 12px;font-size:12px">會</span><span style="background:var(--blue-50);border:1px solid #B5D4F4;border-radius:6px;padding:3px 12px;font-size:12px">不會</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">🕐 時段名額設定</div>
+      <div class="sg" id="slot-grid"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary" onclick="genSlots()">🔄 重新產生時段</button>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 儲存設定</button>
+    </div>
+  </div>
+
+  <!-- Bookings -->
+  <div class="page" id="page-bk">
+    <div class="ph">
+      <div class="fb">
+        <div><div class="pt">預約名單</div><div class="ps" id="bk-sub">—</div></div>
+        <div class="fg2"><select id="bk-fil" onchange="renderBk()" style="font-size:13px;padding:6px 10px;"></select><button class="btn btn-secondary btn-sm" onclick="exportExcel()">⬇ 匯出 Excel</button><button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ 匯出 CSV</button></div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="dt">
+        <thead><tr><th>姓名</th><th>員工編號</th><th>Email</th><th>部門</th><th>日期</th><th>時段</th><th>焊錫</th><th>鉛暴露</th><th>問卷</th><th>狀態</th><th>操作</th></tr></thead>
+        <tbody id="bk-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Employee List Management -->
+  <div class="page" id="page-emp-list">
+    <div class="ph">
+      <div class="fb">
+        <div><div class="pt">員工名單</div><div class="ps" id="emp-list-sub">管理可預約的員工資料</div></div>
+        <div class="fg2">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById(&#39;csv-upload&#39;).click()">⬆ 匯入 Excel / CSV</button>
+          <input type="file" id="csv-upload" accept=".csv,.xlsx,.xls" style="display:none" onchange="importEmpFile(this)">
+          <button class="btn btn-primary btn-sm" onclick="openAddEmp()">＋ 新增員工</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">📋 CSV 匯入格式說明</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.9;margin-bottom:.75rem">
+        CSV 檔案需包含以下欄位（第一列為標題列）：<br>
+        <code style="background:var(--gray-100);padding:2px 8px;border-radius:4px;font-size:12px">eid（員工編號）, name（姓名）, birthday（出生年月日 YYYYMMDD）, idno（身分證字號）, email（Email）, dept（部門）</code>
+      </div>
+      <details>
+        <summary style="font-size:13px;color:var(--teal-600);cursor:pointer;user-select:none">📥 下載範例 CSV</summary>
+        <div style="margin-top:.75rem">
+          <button class="btn btn-secondary btn-sm" onclick="downloadSampleExcel()">下載範例 Excel</button>
+          <button class="btn btn-secondary btn-sm" onclick="downloadSampleCSV()">下載範例 CSV</button>
+        </div>
+      </details>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--gray-100);">
+        <span style="font-size:13px;font-weight:500" id="emp-list-count">載入中…</span>
+        <button class="btn btn-danger btn-sm" onclick="clearAllEmps()">🗑 清空此專案名單</button>
+      </div>
+      <table class="dt" id="emp-table">
+        <thead><tr><th>員工編號</th><th>姓名</th><th>出生年月日</th><th>Email</th><th>部門</th><th>操作</th></tr></thead>
+        <tbody id="emp-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Employee Modal -->
+  <div class="mbd" id="modal-add-emp">
+    <div class="modal" style="max-width:440px">
+      <div class="mtitle" id="emp-modal-title">新增員工</div>
+      <div class="fr">
+        <div class="fg"><label>員工編號 *</label><input type="text" id="new-emp-eid" placeholder="例：E12345"></div>
+        <input type="hidden" id="new-emp-orig-eid">
+        <div class="fg"><label>姓名 *</label><input type="text" id="new-emp-name" placeholder="例：王小明"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>出生年月日 *</label><input type="text" id="new-emp-bday" placeholder="例：19900523" maxlength="8"></div>
+        <div class="fg"><label>身分證字號</label><input type="text" id="new-emp-idno" placeholder="例：A123456789" maxlength="10"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Email</label><input type="email" id="new-emp-email" placeholder="例：name@company.com"></div>
+        <div class="fg"><label>部門</label><input type="text" id="new-emp-dept" placeholder="例：工程部"></div>
+      </div>
+      <div class="alert ai" style="font-size:12px">出生年月日格式為 YYYYMMDD，例如 1990 年 5 月 23 日請輸入 19900523</div>
+      <div class="mact">
+        <button class="btn btn-secondary" onclick="closeM(&#39;modal-add-emp&#39;)">取消</button>
+        <button class="btn btn-primary" onclick="addOneEmp()">新增</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email -->
+  <div class="page" id="page-email">
+    <div class="ph"><div class="pt">通知設定</div><div class="ps">自訂確認信與提醒信</div></div>
+    <div class="card">
+      <div class="ct">✅ 預約確認信</div>
+      <div class="alert ai">員工完成預約後自動寄出</div>
+      <div class="fr s"><div class="fg"><label>主旨</label><input type="text" id="cf-s"></div></div>
+      <div class="fr s"><div class="fg"><label>內容（可用 {name} {date} {time} {location} {company} 變數）</label><textarea id="cf-b" rows="8"></textarea></div></div>
+      <button class="btn btn-secondary btn-sm mt1" onclick="prevEmail(&#39;cf&#39;)">👁 預覽</button>
+    </div>
+    <div class="card">
+      <div class="ct">🔔 前一天提醒信</div>
+      <div class="alert aw">體檢前一天排程寄送（需後端排程服務）</div>
+      <div class="fr s"><div class="fg"><label>主旨</label><input type="text" id="rm-s"></div></div>
+      <div class="fr s"><div class="fg"><label>內容</label><textarea id="rm-b" rows="8"></textarea></div></div>
+      <div class="fr"><div class="fg"><label>寄送時間</label><select id="rm-t"><option value="09:00">前一天 09:00</option><option value="13:00">前一天 13:00</option><option value="17:00" selected="">前一天 17:00</option></select></div></div>
+      <button class="btn btn-secondary btn-sm mt1" onclick="prevEmail(&#39;rm&#39;)">👁 預覽</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="saveEmail()">💾 儲存通知設定</button>
+      <button class="btn btn-secondary" onclick="sendRemindersNow()">📨 立即寄送提醒信給所有預約者</button>
+    </div>
+    <div class="alert ai" style="margin-top:1rem;font-size:13px">
+      <strong>📌 信件變數說明（在主旨或內文中使用）：</strong><br>
+      <code style="background:var(--gray-100);padding:1px 5px;border-radius:4px">{name}</code> 員工姓名 ｜
+      <code style="background:var(--gray-100);padding:1px 5px;border-radius:4px">{co}</code> 公司名稱 ｜
+      <code style="background:var(--gray-100);padding:1px 5px;border-radius:4px">{date}</code> 體檢日期 ｜
+      <code style="background:var(--gray-100);padding:1px 5px;border-radius:4px">{time}</code> 預約時段<br>
+      <code style="background:var(--gray-100);padding:1px 5px;border-radius:4px">{loc}</code> 體檢地點 ｜
+      <code style="background:var(--gray-100);padding:1px 5px;border-radius:4px">{contact}</code> 聯絡人 ｜
+      <code style="background:var(--gray-100);padding:1px 5px;border-radius:4px">{projectName}</code> 專案名稱
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="page" id="page-stats">
+    <div class="ph"><div class="pt">統計總覽</div><div class="ps" id="st-sub">—</div></div>
+    <div class="sr">
+      <div class="sc"><div class="sl">總預約人數</div><div class="sv teal" id="st-tot">0</div></div>
+      <div class="sc"><div class="sl">總容量</div><div class="sv" id="st-cap">—</div></div>
+      <div class="sc"><div class="sl">填滿率</div><div class="sv amber" id="st-rate">—</div></div>
+      <div class="sc"><div class="sl">剩餘名額</div><div class="sv" id="st-rem">—</div></div>
+    </div>
+    <div class="card"><div class="ct">📆 各日期狀況</div><div id="st-daily"></div></div>
+  </div>
+
+
+  <!-- Employee Home（我的預約） -->
+  <div class="page" id="page-emp-home">
+    <div class="emp-home">
+      <!-- Tab 切換 -->
+      <div class="emp-nav-tabs">
+        <button class="emp-tab active" id="emp-tab-home" onclick="empTabSwitch(&#39;home&#39;)">📋 我的預約</button>
+        <button class="emp-tab" id="emp-tab-book" onclick="empTabSwitch(&#39;book&#39;)">＋ 新增預約</button>
+      </div>
+
+      <!-- 已有預約 -->
+      <div id="emp-has-booking" style="display:none">
+        <div class="emp-booking-card has-booking" id="emp-booking-detail">
+          <div class="emp-booking-header">
+            <div class="emp-booking-avatar">✅</div>
+            <div>
+              <div class="emp-booking-title">預約已確認</div>
+              <div class="emp-booking-sub" id="emp-bk-proj">—</div>
+            </div>
+          </div>
+          <div class="emp-info-row"><span class="emp-info-label">體檢日期</span><span class="emp-info-value" id="emp-bk-date">—</span></div>
+          <div class="emp-info-row"><span class="emp-info-label">預約時段</span><span class="emp-info-value" id="emp-bk-time">—</span></div>
+          <div class="emp-info-row"><span class="emp-info-label">體檢地點</span><span class="emp-info-value" id="emp-bk-loc">—</span></div>
+          <div class="emp-info-row" id="emp-bk-solder-row" style="display:none"><span class="emp-info-label">焊錫問卷</span><span class="emp-info-value" id="emp-bk-solder">—</span></div>
+          <hr class="d">
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-danger" style="flex:1;justify-content:center;" onclick="empCancelBooking()">🗑 取消預約</button>
+          </div>
+          <div style="font-size:12px;color:var(--gray-400);text-align:center;margin-top:.75rem">如需更改預約，請先取消再重新預約</div>
+        </div>
+      </div>
+
+      <!-- 尚未預約 -->
+      <div id="emp-no-booking" style="display:none">
+        <div class="emp-booking-card">
+          <div class="emp-no-booking">
+            <div class="emp-no-icon">📅</div>
+            <div class="emp-no-title">尚未預約體檢</div>
+            <div class="emp-no-sub" id="emp-no-sub">點擊下方按鈕開始預約您的體檢時段</div>
+            <button class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;justify-content:center;" onclick="empTabSwitch(&#39;book&#39;)">開始預約體檢 →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Employee Q Gate -->
+  <div class="page" id="page-e0">
+    <div class="steps">
+      <div class="step active"><div class="snum">1</div>完成線上問卷</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">2</div>選擇日期與時段</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">3</div>填寫資料</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">4</div>完成</div>
+    </div>
+    <div class="qgate">
+      <div class="qgate-icon">📋</div>
+      <div class="qgate-title">預約前請先完成線上問卷</div>
+      <div class="qgate-sub" id="q-gate-desc">請先完成伊克希曼健檢線上問卷。</div>
+      <div class="qbadge">🏥 伊克希曼健康管理系統</div>
+      <div class="qsteps">
+        <div class="qstep"><div class="qstep-num">1</div><div class="qstep-text"><strong>點擊下方按鈕前往問卷</strong>在新分頁開啟問卷，請完整填寫。</div></div>
+        <div class="qstep"><div class="qstep-num">2</div><div class="qstep-text"><strong>填寫完畢後回到本頁面</strong>在下方勾選「已完成問卷填寫」。</div></div>
+        <div class="qstep"><div class="qstep-num">3</div><div class="qstep-text"><strong>繼續進行體檢預約</strong>勾選確認後即可選擇日期與時段。</div></div>
+      </div>
+      <div class="qactions">
+        <a id="q-link-btn" href="https://crimson-base-8091.tiffany88070660.workers.dev/#" target="_blank" class="btn-qlink" onclick="openQ()">📋 前往填寫伊克希曼線上問卷 ↗</a>
+        <div class="q-confirm-row" id="q-conf-row">
+          <input type="checkbox" id="q-done-chk" onchange="onQCheck()">
+          <label for="q-done-chk">我已完成問卷填寫，確認返回預約頁面</label>
+        </div>
+        <button class="btn btn-primary" id="q-proceed-btn" onclick="proceedQ()" disabled="" style="width:100%;padding:12px;font-size:14px;">繼續預約 →</button>
+        <button class="btn btn-secondary" style="width:100%;justify-content:center;font-size:12px;" onclick="skipQ()">⚠ 略過問卷（不建議）</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Step 1 -->
+  <div class="page" id="page-e1">
+    <div class="pt" id="e-title" style="margin-bottom:4px">員工體檢預約</div>
+    <div class="ps" id="e-loc" style="margin-bottom:1.5rem">—</div>
+    <div class="steps">
+      <div class="step done"><div class="snum">✓</div>完成線上問卷</div><div class="sdivr"></div>
+      <div class="step active"><div class="snum">2</div>選擇日期與時段</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">3</div>填寫資料</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">4</div>完成</div>
+    </div>
+    <div class="card" id="skip-banner" style="display:none;background:var(--amber-50);border-color:var(--amber-100)"><div style="font-size:13px;color:var(--amber-600)">⚠ 您略過了問卷填寫，建議於體檢前完成伊克希曼線上問卷。</div></div>
+    <div class="card"><div class="ct">📅 選擇體檢日期</div><div class="dg" id="e-dates"></div></div>
+    <div class="card" id="e-tc" style="display:none">
+      <div class="ct" id="e-tt">🕐 選擇時段</div>
+      <div class="tg" id="e-times"></div>
+      <button class="btn btn-primary" id="e-btn2" onclick="goStep3()" disabled="">繼續填寫資料 →</button>
+    </div>
+  </div>
+
+
+  <!-- Employee: Solder Questions -->
+  <div class="page" id="page-eq">
+    <div class="pt" id="eq-title" style="margin-bottom:4px">員工體檢預約</div>
+    <div class="ps" id="eq-loc" style="margin-bottom:1.5rem">—</div>
+    <div class="steps">
+      <div class="step done"><div class="snum">✓</div>完成線上問卷</div><div class="sdivr"></div>
+      <div class="step done"><div class="snum">✓</div>選擇日期與時段</div><div class="sdivr"></div>
+      <div class="step active"><div class="snum">3</div>職業問卷</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">4</div>填寫資料</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">5</div>完成</div>
+    </div>
+    <div class="card" style="max-width:600px">
+      <div class="ct">🔧 職業暴露問卷</div>
+      <div class="alert ai" style="margin-bottom:1.25rem">以下題目將協助醫師提供更完善的健康評估，請如實填答。</div>
+
+      <!-- Q1 -->
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:14px;font-weight:500;color:var(--gray-800);margin-bottom:.75rem;line-height:1.6">
+          <span style="display:inline-block;background:var(--teal-600);color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px;margin-right:8px;font-weight:500">1</span>
+          請問您的工作有焊錫作業嗎？
+        </div>
+        <div style="display:flex;gap:10px">
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 20px;border:1.5px solid var(--gray-200);border-radius:8px;cursor:pointer;flex:1;justify-content:center;font-size:14px;font-weight:500;transition:all .15s" id="sq1-yes-label">
+            <input type="radio" name="sq1" value="yes" id="sq1-yes" onchange="onSQ1Change()" style="accent-color:var(--teal-600)"> 有
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 20px;border:1.5px solid var(--gray-200);border-radius:8px;cursor:pointer;flex:1;justify-content:center;font-size:14px;font-weight:500;transition:all .15s" id="sq1-no-label">
+            <input type="radio" name="sq1" value="no" id="sq1-no" onchange="onSQ1Change()" style="accent-color:var(--teal-600)"> 沒有
+          </label>
+        </div>
+      </div>
+
+      <!-- Q2（條件顯示） -->
+      <div id="sq2-block" style="display:none;margin-bottom:1.5rem;padding:1rem;background:var(--amber-50);border-radius:10px;border:1px solid var(--amber-100)">
+        <div style="font-size:14px;font-weight:500;color:var(--gray-800);margin-bottom:.75rem;line-height:1.6">
+          <span style="display:inline-block;background:var(--amber-600);color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px;margin-right:8px;font-weight:500">2</span>
+          請問您焊錫作業時，會接觸到「鉛」嗎？
+        </div>
+        <div style="display:flex;gap:10px">
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 20px;border:1.5px solid var(--amber-100);border-radius:8px;cursor:pointer;flex:1;justify-content:center;font-size:14px;font-weight:500;background:#fff;transition:all .15s" id="sq2-yes-label">
+            <input type="radio" name="sq2" value="yes" id="sq2-yes" onchange="onSQ2Change(&#39;yes&#39;)" style="accent-color:var(--amber-600)"> 會
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 20px;border:1.5px solid var(--amber-100);border-radius:8px;cursor:pointer;flex:1;justify-content:center;font-size:14px;font-weight:500;background:#fff;transition:all .15s" id="sq2-no-label">
+            <input type="radio" name="sq2" value="no" id="sq2-no" onchange="onSQ2Change(&#39;no&#39;)" style="accent-color:var(--amber-600)"> 不會
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:.5rem">
+        <button class="btn btn-secondary" onclick="showPage(&#39;page-e1&#39;)">← 返回</button>
+        <button class="btn btn-primary" id="eq-next-btn" onclick="submitSolderQ()" disabled="">繼續填寫資料 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Step 2 -->
+  <div class="page" id="page-e2">
+    <div class="ph"><div class="pt">填寫個人資料</div><div class="ps" id="e2-info">—</div></div>
+    <div class="steps">
+      <div class="step done"><div class="snum">✓</div>完成線上問卷</div><div class="sdivr"></div>
+      <div class="step done"><div class="snum">✓</div>選擇日期與時段</div><div class="sdivr"></div>
+      <div class="step active"><div class="snum">3</div>填寫資料</div><div class="sdivr"></div>
+      <div class="step"><div class="snum">4</div>完成</div>
+    </div>
+    <div class="card">
+      <div class="ct">👤 員工資訊</div>
+      <div class="fr"><div class="fg"><label>姓名 *</label><input type="text" id="e-name"></div><div class="fg"><label>員工編號 *</label><input type="text" id="e-eid"></div></div>
+      <div class="fr"><div class="fg"><label>聯絡電話</label><input type="tel" id="e-ph"></div><div class="fg"><label>Email *</label><input type="email" id="e-email"></div></div>
+      <div class="fr"><div class="fg" style="display:none"><input type="text" id="e-idno"></div><div class="fg"><label>部門</label><select id="e-dept"><option value="">請選擇</option><option>工程部</option><option>業務部</option><option>行銷部</option><option>財務部</option><option>人資部</option><option>法務部</option><option>營運部</option><option>其他</option></select></div><div class="fg"><label>備註</label><input type="text" id="e-note"></div></div>
+      <hr class="d">
+      <div class="alert ai">ℹ️ 確認信將寄至您的 Email，體檢前一天亦會收到提醒。</div>
+      <div style="display:flex;gap:8px;"><button class="btn btn-secondary" onclick="showPage(&#39;page-e1&#39;)">← 返回</button><button class="btn btn-primary" onclick="submitBooking()">確認預約 ✓</button></div>
+    </div>
+  </div>
+
+  <!-- Employee Step 3 -->
+  <div class="page" id="page-e3">
+    <div class="steps">
+      <div class="step done"><div class="snum">✓</div>完成線上問卷</div><div class="sdivr"></div>
+      <div class="step done"><div class="snum">✓</div>選擇日期與時段</div><div class="sdivr"></div>
+      <div class="step done"><div class="snum">✓</div>填寫資料</div><div class="sdivr"></div>
+      <div class="step active"><div class="snum">4</div>完成</div>
+    </div>
+    <div class="card">
+      <div class="succ"><div class="sicon">✅</div><div class="stitle">預約成功！</div><div class="ssub">確認信已寄送至您的信箱，請記得查收</div></div>
+      <hr class="d">
+      <div class="ct">📧 確認信預覽</div>
+      <div class="ep" id="e-cfp"></div>
+      <div class="mt2" style="text-align:center;"><button class="btn btn-secondary" onclick="showEmpHome()">查看我的預約</button></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   GOOGLE SHEETS API
+══════════════════════════════════════════ */
+// ── Google Sheets 串接網址（固定寫死，無需手動設定）──
+const GS_URL = 'https://script.google.com/macros/s/AKfycbw57WIlqDs-HtLy-W0QQej1RyCm94s1LhvMDzWmIRLM1yZ5FHn9SPVKM2P1YWZtehEp0g/exec';
+
+async function gsGet(action) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20000);
+  // 加入時間戳避免瀏覽器或 Apps Script 快取（無痕模式尤其重要）
+  const url = GS_URL + '?action=' + action + '&t=' + Date.now();
+  try {
+    const r = await fetch(url, {
+      signal: controller.signal,
+      cache: 'no-store'
+    });
+    clearTimeout(timer);
+    const text = await r.text();
+    try { return JSON.parse(text); } catch(e) { return { status:'error', message: text }; }
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+// 寫入用 GET 方式（確保能收到回應，繞過 CORS 問題）
+async function gsWrite(body) {
+  const payload = JSON.stringify(body);
+  const encoded = encodeURIComponent(payload);
+
+  // 策略 1：URL 短於 7000 字元，用 GET（已驗證 GET 可正確被 doGet 處理）
+  if(encoded.length < 7000){
+    const url = GS_URL + '?method=post&payload=' + encoded + '&t=' + Date.now();
+    try {
+      const r = await fetch(url, {
+        cache: 'no-store',
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+      const text = await r.text();
+      try { return JSON.parse(text); } catch(e) { return { status:'ok' }; }
+    } catch(e){
+      console.warn('[gsWrite] GET 失敗，改用 no-cors POST:', e.message);
+    }
+  }
+
+  // 策略 2：URL 太長 或 GET 失敗，用 no-cors POST（雖收不到回應但能成功寫入）
+  try {
+    await fetch(GS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      cache: 'no-store',
+      credentials: 'omit',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: 'payload=' + encoded
+    });
+    // no-cors 收不到回應，但實際有寫入
+    return { status:'ok', note:'sent via no-cors' };
+  } catch(e){
+    return { status:'error', message: e.message };
+  }
+}
+
+// 管理員專屬寫入：自動帶 adminToken
+async function gsWriteAuth(body) {
+  if (!adminToken) {
+    showToast('⚠ 請重新登入管理員');
+    return { status:'error', message:'No admin token' };
+  }
+  const result = await gsWrite({ ...body, token: adminToken });
+  // Token 失效時自動踢出
+  if (result?.code === 'TOKEN_INVALID') {
+    adminToken = null;
+    showToast('⚠ 登入已過期，請重新登入');
+    setTimeout(() => doLogout(), 1500);
+  }
+  return result;
+}
+
+async function gsPost(body) {
+  // 用 application/x-www-form-urlencoded POST（no-cors simple request）
+  const formBody = 'payload=' + encodeURIComponent(JSON.stringify(body));
+  // 先用帶 CORS 的方式嘗試（可取得回應確認），失敗再改 no-cors
+  try {
+    const r = await fetch(GS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formBody
+    });
+    const txt = await r.text();
+    try {
+      const res = JSON.parse(txt);
+      if(res.status !== 'ok') console.warn('GS write warn:', res.message);
+      return res;
+    } catch(e){ return { status:'ok' }; }
+  } catch(corsErr) {
+    // CORS 失敗就用 no-cors 靜默送出
+    await fetch(GS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formBody
+    });
+    return { status:'ok' };
+  }
+}
+
+async function gsPostResult(body) {
+  return await gsPost(body);
+}
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let projects = [], bookings = [], employees = [], config = {};
+let cid = null, curUser = null;
+let eDate = null, eTime = null, selC = '#0F6E56', pmEnabled = false;
+let qDone = false, qSkipped = false;
+
+function P(id){ return projects.find(p => p.id === (id ?? cid)); }
+function CP(){ return P(cid); }
+function PB(pid){ return bookings.filter(b => b.pid === (pid ?? cid)); }
+
+/* ══════════════════════════════════════════
+   INIT & LOAD
+══════════════════════════════════════════ */
+function bootMsg(msg) {
+  const el = document.getElementById('boot-msg');
+  if (el) el.textContent = msg;
+}
+
+function bootError(msg) {
+  document.getElementById('boot-err-msg').textContent = msg;
+  document.getElementById('boot-err').style.display = '';
+  document.getElementById('boot-msg').style.display = 'none';
+  document.querySelector('.boot-spinner').style.display = 'none';
+}
+
+async function appInit() {
+  document.getElementById('boot-err').style.display = 'none';
+  document.querySelector('.boot-spinner').style.display = '';
+  document.getElementById('boot-msg').style.display = '';
+  bootMsg('連線中…');
+
+  // 先判斷是否為管理員模式（?k=ctsh2026med），若是則允許在連線失敗時仍可登入
+  const urlParams = new URLSearchParams(window.location.search);
+  const ADMIN_KEY = 'ctsh2026med';
+  const isAdminEntry = urlParams.get('k') === ADMIN_KEY;
+
+  try {
+    // 階段二：只載入公開資料（專案列表用於登入畫面渲染）
+    const res = await gsGet('getPublicData');
+    if (!res || res.status !== 'ok') throw new Error(res?.message || '資料載入失敗');
+
+    projects  = res.projects  || [];
+    bookings  = [];    // 登入前不載入個資
+    employees = [];    // 登入前不載入員工名單
+    config    = {};    // 登入前不載入系統設定
+  } catch(e) {
+    // 若為管理員入口，即使連線失敗也讓其進入登入框
+    if (isAdminEntry) {
+      projects = []; bookings = []; employees = []; config = {};
+    } else {
+      bootError('連線失敗，請重試');
+      return;
+    }
+  }
+
+  // 淡出開機畫面，顯示登入頁
+  const loading = document.getElementById('gs-loading');
+  loading.classList.add('hidden');
+  setTimeout(() => loading.classList.add('gone'), 450);
+
+  document.getElementById('app-shell').style.display = '';
+  document.getElementById('sidebar').style.display = 'none';
+  document.getElementById('ubadge').style.display = 'none';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('tp').style.display = 'none';
+  document.getElementById('login-screen').classList.remove('hidden');
+
+  // URL 參數決定入口模式：?k=ctsh2026med 自動開啟管理員登入；其他則為員工模式
+  if(isAdminEntry){
+    // 管理員模式：自動彈出登入框，隱藏員工登入元件
+    document.querySelector('.lcard').style.display = 'none';
+    setTimeout(() => openAdmLogin(), 100);
+  } else {
+    // 員工模式：隱藏管理員入口連結
+    const adminLink = document.querySelector('.admin-link');
+    if(adminLink) adminLink.style.display = 'none';
+  }
+
+  startAutoSync(parseInt(config.sync_interval) || 30);
+}
+
+async function loadAllData() {
+  setLoading(true, '從 Google Sheets 載入資料中…');
+  try {
+    const res = await gsGet('getBootData');
+    if (res.status === 'ok') {
+      projects  = res.projects  || [];
+      bookings  = res.bookings  || [];
+      employees = res.employees || [];
+      config    = res.config    || {};
+      if (config.sync_interval !== undefined) {
+        const sel = document.getElementById('sync-interval');
+        if (sel) sel.value = String(config.sync_interval);
+      }
+    }
+    setLoading(false);
+  } catch(e) {
+    setLoading(false);
+    showToast('⚠ 載入資料失敗，請重新整理頁面');
+  }
+}
+
+async function initWithGsUrl() {
+  setLoading(true, '初始化 Google Sheets…');
+  try {
+    const res = await gsGet('init');
+    if (res.status === 'ok') {
+      await loadAllData();
+      setLoading(false);
+      showToast('✅ 初始化成功！');
+      showPage('page-gs-setup');
+    } else {
+      setLoading(false);
+      showToast('初始化失敗：' + (res.message||''));
+    }
+  } catch(e) {
+    setLoading(false);
+    showToast('⚠ 連線失敗，請確認網址與部署設定');
+  }
+}
+
+// 操作中的小 loading（不同於開機大畫面，用 toast 取代）
+function setLoading(show, msg) {
+  if (show && msg) showToast(msg);
+  // 開機畫面已在 appInit 處理，此函式保留相容性
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+function t2m(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
+
+// ── 身分證字號顯示（後端已加密儲存，前端只顯示遮蔽版本） ──
+// 注意：前端不再持有加解密邏輯，所有加密由後端 Apps Script 處理
+function maskId(encoded){
+  if(!encoded) return '—';
+  const s = String(encoded).trim();
+  // 後端應已遮蔽，前端只在收到舊版加密字串時做基本處理
+  if(s.startsWith('enc:')) return '已加密';
+  if(s.includes('****')) return s;
+  // 萬一是明文（舊資料），前端也做基本遮蔽
+  if(s.length < 7) return s;
+  return s.slice(0,3) + '****' + s.slice(-3);
+}
+
+function fmtDate(v){
+  if(!v && v !== 0) return '';
+  // 已是正確格式
+  if(typeof v === 'string'){
+    const s = v.trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    // ISO 字串如 "2026-05-11T16:00:00.000Z" → 用本地時間（台灣 UTC+8）
+    const d = new Date(s);
+    if(!isNaN(d.getTime())){
+      // 加 8 小時轉成台灣時間再取日期
+      const local = new Date(d.getTime() + 8*60*60*1000);
+      const y = local.getUTCFullYear();
+      const m = String(local.getUTCMonth()+1).padStart(2,'0');
+      const dd = String(local.getUTCDate()).padStart(2,'0');
+      return y+'-'+m+'-'+dd;
+    }
+  }
+  if(v instanceof Date){
+    const local = new Date(v.getTime() + 8*60*60*1000);
+    const y = local.getUTCFullYear();
+    const m = String(local.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(local.getUTCDate()).padStart(2,'0');
+    return y+'-'+m+'-'+dd;
+  }
+  return String(v).trim();
+}
+function fmtTime(v){
+  if(!v && v !== 0) return '';
+  // 已是正確格式
+  if(typeof v === 'string'){
+    const s = v.trim();
+    if(/^\d{1,2}:\d{2}$/.test(s)) return s.padStart(5,'0');
+    // ISO 字串如 "1899-12-30T02:00:00.000Z" → 取 UTC 小時（Sheets 時間序列）
+    if(s.includes('T')){
+      const d = new Date(s);
+      if(!isNaN(d.getTime())){
+        // Sheets 時間以 UTC 儲存，直接取 UTC 時間
+        const h = String(d.getUTCHours()).padStart(2,'0');
+        const m = String(d.getUTCMinutes()).padStart(2,'0');
+        return h+':'+m;
+      }
+    }
+  }
+  if(v instanceof Date){
+    // Sheets Date 物件的時間用 UTC
+    const h = String(v.getUTCHours()).padStart(2,'0');
+    const m = String(v.getUTCMinutes()).padStart(2,'0');
+    return h+':'+m;
+  }
+  // Sheets 小數序列（0=00:00, 0.5=12:00）
+  if(typeof v === 'number' && v >= 0 && v < 1){
+    const totalMin = Math.round(v * 24 * 60);
+    return m2t(totalMin);
+  }
+  return String(v).trim();
+}
+
+function t2m(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
+function fmtDate(v){
+  // Google Sheets 會把 YYYY-MM-DD 轉成 Date 物件，還原為字串
+  if(!v) return '';
+  if(typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.trim())) return v.trim();
+  const d = (v instanceof Date) ? v : new Date(v);
+  if(!isNaN(d.getTime())){
+    // 用 UTC 避免時區偏移問題
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(d.getUTCDate()).padStart(2,'0');
+    return y+'-'+m+'-'+dd;
+  }
+  return String(v).trim();
+}
+function fmtTime(v){
+  // Google Sheets 可能把 HH:mm 轉成 Date 物件或數字，統一還原成 HH:mm 字串
+  if(!v) return '';
+  if(typeof v === 'string' && /^\d{1,2}:\d{2}$/.test(v.trim())) return v.trim();
+  if(v instanceof Date){
+    const h=String(v.getHours()).padStart(2,'0');
+    const m=String(v.getMinutes()).padStart(2,'0');
+    return h+':'+m;
+  }
+  // Sheets 序列數：0=00:00, 0.5=12:00, 以 86400 秒換算
+  if(typeof v === 'number' && v >= 0 && v < 1){
+    const totalMin = Math.round(v * 24 * 60);
+    return m2t(totalMin);
+  }
+  // 嘗試從字串解析（例如 "1899-12-30T08:00:00.000Z"）
+  const d = new Date(v);
+  if(!isNaN(d.getTime())){
+    const h=String(d.getUTCHours()).padStart(2,'0');
+    const m=String(d.getUTCMinutes()).padStart(2,'0');
+    return h+':'+m;
+  }
+  return String(v).trim();
+}
+function m2t(m){ return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+function dRange(s,e,enabledDates){
+  const o=[];
+  const sf=fmtDate(s)||s, ef=fmtDate(e)||e;
+  if(!sf||!ef) return o;
+  const sd=new Date(sf+'T00:00:00'), ed=new Date(ef+'T00:00:00');
+  if(isNaN(sd)||isNaN(ed)) return o;
+  for(let d=new Date(sd); d<=ed; d.setDate(d.getDate()+1)){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    o.push(y+'-'+m+'-'+dd);
+  }
+  // 若有 enabledDates 篩選清單，只保留勾選的日期
+  if(Array.isArray(enabledDates) && enabledDates.length){
+    return o.filter(d => enabledDates.includes(d));
+  }
+  return o;
+}
+
+// 取得專案實際可用日期（套用 enabledDates 篩選）
+function projectDates(p){
+  if(!p) return [];
+  const all = dRange(p.s||'', p.e||'');
+  if(p.enabledDates && Array.isArray(p.enabledDates) && p.enabledDates.length){
+    return all.filter(d => p.enabledDates.includes(d));
+  }
+  return all;
+}
+
+// 切換自訂日期模式
+function toggleCustomDates(){
+  const cb = document.getElementById('ev-custom-dates');
+  document.getElementById('ev-date-picker').style.display = cb.checked ? '' : 'none';
+  if(cb.checked) renderDatePicker();
+  // 重新產生 slots
+  genSlots();
+}
+
+// 起訖日期變動時，若已啟用自訂模式則重新繪製清單
+function updateDateMode(){
+  const cb = document.getElementById('ev-custom-dates');
+  if(cb && cb.checked) renderDatePicker();
+  genSlots();
+}
+
+// 繪製日期勾選清單
+function renderDatePicker(){
+  const p = CP(); if(!p) return;
+  const s = document.getElementById('ev-s').value;
+  const e = document.getElementById('ev-e').value;
+  const allDates = dRange(s, e); // 取得起訖內所有日期
+  const enabled = p.enabledDates || allDates; // 預設全選
+
+  const cont = document.getElementById('ev-date-list');
+  if(!allDates.length){
+    cont.innerHTML = '<p style="font-size:12px;color:var(--gray-400)">請先設定開放日期（起）與（迄）</p>';
+    return;
+  }
+
+  const w = ['日','一','二','三','四','五','六'];
+  cont.innerHTML = allDates.map(d => {
+    const isSelected = enabled.includes(d);
+    const date = new Date(d+'T00:00:00');
+    const label = (date.getMonth()+1) + '/' + date.getDate() + ' (週' + w[date.getDay()] + ')';
+    return `<label class="ev-date-chip ${isSelected?'selected':''}" data-date="${d}" onclick="toggleDateChip('${d}', this)">
+      <input type="checkbox" ${isSelected?'checked':''}/>
+      ${label}
+    </label>`;
+  }).join('');
+}
+
+// 點選日期 chip
+function toggleDateChip(date, el){
+  const p = CP(); if(!p) return;
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.classList.toggle('selected', cb.checked);
+
+  // 更新 enabledDates
+  if(!p.enabledDates) p.enabledDates = dRange(p.s||'', p.e||'');
+  if(cb.checked){
+    if(!p.enabledDates.includes(date)) p.enabledDates.push(date);
+  } else {
+    p.enabledDates = p.enabledDates.filter(d => d !== date);
+  }
+
+  // 重新產生時段
+  genSlots();
+}
+function fD(ds){
+  const s = fmtDate(ds)||String(ds||'');
+  if(!s || !s.match(/^\d{4}-\d{2}-\d{2}$/)) return s||'—';
+  const d = new Date(s+'T00:00:00');
+  const w = ['日','一','二','三','四','五','六'];
+  return s.replace(/-/g,'/') + ' (週' + w[d.getDay()] + ')';
+}
+function gT(p){ const o=[],iv=p.iv||30,amS=fmtTime(p.amS)||'08:00',amE=fmtTime(p.amE)||'12:00'; for(let t=t2m(amS);t<t2m(amE);t+=iv)o.push(m2t(t)); if(p.hasPM&&p.pmS&&p.pmE){const ps=fmtTime(p.pmS),pe=fmtTime(p.pmE);for(let t=t2m(ps);t<t2m(pe);t+=iv)o.push(m2t(t));} return o; }
+function bc(pid,d,t){
+  return bookings.filter(b=>
+    String(b.pid)===String(pid) &&
+    (fmtDate(b.date)||String(b.date||''))===String(d) &&
+    (fmtTime(b.time)||String(b.time||''))===String(t)
+  ).length;
+}
+function cap(p,d,t){ return p.slots?.[d]?.[t]?.cap ?? p.cap ?? 30; }
+function fT(tpl,v){ return (tpl||'').replace(/\{(\w+)\}/g,(_,k)=>v[k]||`{${k}}`); }
+function eHTML(s,b){ const from = config.mail_from || 'service@cthmhc.com'; return `<div class="eh"><h3>${s}</h3><p>寄件者：${from}</p></div><div class="eb" style="white-space:pre-wrap">${b}</div>`; }
+function dCF(){ return `親愛的 {name} 您好，\n\n您的體檢預約已成功確認：\n\n📅 體檢日期：{date}\n🕐 預約時段：{time}\n📍 體檢地點：{location}\n🏢 公司活動：{company}\n\n請於預約時段前 10 分鐘抵達，並攜帶員工證。\n\n人資部門 敬上`; }
+function dRM(){ return `親愛的 {name} 您好，\n\n提醒您，明天（{date}）是您的體檢日！\n\n🕐 預約時段：{time}\n📍 體檢地點：{location}\n\n✅ 注意事項：\n• 體檢前一晚 10 點後請禁食（可飲清水）\n• 請穿著寬鬆舒適的服裝\n• 攜帶員工證\n\n人資部門 敬上`; }
+
+/* ══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
+function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function showAdmin(name){
+  if(!cid){ showToast('請先選擇一個專案'); return; }
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-'+name).classList.add('active');
+  showPage('page-'+name);
+  if(name==='bk')renderBk(); if(name==='stats')renderStats(); if(name==='setup')syncSetup(); if(name==='email')syncEmail(); if(name==='emp-list')renderEmpList();
+}
+function showProjPage(){ document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); showPage('page-proj'); renderGrid(); }
+
+
+/* ══ EMPLOYEE LIST MANAGEMENT ══ */
+async function renderEmpList(){
+  const p = CP(); if(!p)return;
+  document.getElementById('emp-list-sub').textContent = p.co+' — '+p.name+' 的員工名單';
+  console.log('[renderEmpList] employees 總數:', employees.length, '| 當前 pid:', JSON.stringify(p.id));
+  if(employees.length > 0) console.log('[renderEmpList] 第一筆:', JSON.stringify(employees[0]));
+  const list = employees.filter(e=>String(e.pid||'').trim()===String(p.id||'').trim());
+  console.log('[renderEmpList] 過濾後人數:', list.length);
+  document.getElementById('emp-list-count').textContent = `共 ${list.length} 位員工`;
+  const tbody = document.getElementById('emp-tbody');
+  if(!list.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray-400)">尚無員工名單，請新增或匯入 CSV</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(e=>`
+    <tr>
+      <td><strong>${e.eid}</strong></td>
+      <td>${e.name||'—'}</td>
+      <td>${e.birthday}</td>
+      <td>${e.email||'—'}</td>
+      <td>${e.dept||'—'}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-secondary btn-sm" onclick="editEmp('${e.eid}','${e.pid}')">編輯</button>
+        <button class="btn btn-danger btn-sm" onclick="delEmp('${e.eid}','${e.pid}')">刪除</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddEmp(){
+  ['new-emp-eid','new-emp-name','new-emp-bday','new-emp-idno','new-emp-email','new-emp-orig-eid'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('new-emp-eid').readOnly = false;
+  document.getElementById('emp-modal-title').textContent = '新增員工';
+  document.getElementById('modal-add-emp').classList.add('open');
+}
+
+function editEmp(eid, pid){
+  const emp = employees.find(e=>String(e.eid)===String(eid)&&String(e.pid)===String(pid));
+  if(!emp) return;
+  document.getElementById('new-emp-orig-eid').value = eid; // 記住原始 eid
+  document.getElementById('new-emp-eid').value   = emp.eid;
+  document.getElementById('new-emp-eid').readOnly = true; // 編輯時鎖定員工編號
+  document.getElementById('new-emp-name').value  = emp.name||'';
+  document.getElementById('new-emp-bday').value  = emp.birthday||'';
+  // 管理員編輯時看不到明文身分證（只顯示遮蔽），若要修改要清空重輸
+  document.getElementById('new-emp-idno').value = '';
+  document.getElementById('new-emp-idno').placeholder = emp.idno ? maskId(emp.idno) + '（如需更改請重新輸入完整身分證）' : '例：A123456789';
+  document.getElementById('new-emp-email').value = emp.email||'';
+  document.getElementById('new-emp-dept').value  = emp.dept||'';
+  document.getElementById('emp-modal-title').textContent = '編輯員工';
+  document.getElementById('modal-add-emp').classList.add('open');
+}
+
+async function addOneEmp(){
+  console.log('[addEmp] 開始');
+  const p=CP();
+  if(!p){ console.error('[addEmp] 沒有當前專案'); return; }
+  console.log('[addEmp] 當前專案:', p.id, p.co);
+
+  const eid=document.getElementById('new-emp-eid').value.trim();
+  const origEid=document.getElementById('new-emp-orig-eid').value.trim();
+  const isEdit = !!origEid;
+  const bday=document.getElementById('new-emp-bday').value.trim();
+  if(!eid){ showToast('請輸入員工編號'); return; }
+  if(!bday||bday.length!==8||!/^\d{8}$/.test(bday)){ showToast('出生年月日需為8位數，例：19900523'); return; }
+  const name=document.getElementById('new-emp-name').value.trim();
+  const idno=document.getElementById('new-emp-idno').value.trim().toUpperCase();
+  const empEmail=document.getElementById('new-emp-email').value.trim();
+  const empDept=document.getElementById('new-emp-dept').value.trim();
+  if(!name){ showToast('請輸入姓名'); return; }
+  // 編輯模式下，若身分證欄位為空就保留原有加密值（不覆寫）
+  let finalIdno = idno;
+  if(isEdit && !idno){
+    const oldEmp = employees.find(e => String(e.eid)===origEid && String(e.pid)===p.id);
+    finalIdno = oldEmp?.idno || '';
+  }
+  const emp = { eid, birthday:bday, name, idno: finalIdno, email:empEmail, dept:empDept, pid:p.id };
+  console.log('[addEmp] 要新增的員工:', emp);
+
+  closeM('modal-add-emp');
+  stopAutoSync();
+  setLoading(true, '儲存中…');
+
+  try {
+    console.log('[addEmp] 當前 p.id:', JSON.stringify(p.id));
+    console.log('[addEmp] 寫入前 emp.pid:', JSON.stringify(emp.pid));
+
+    // 立即更新前端陣列
+    employees = employees.filter(e=>!(String(e.eid)===(isEdit?origEid:eid) && String(e.pid)===p.id));
+    employees.push(emp);
+
+    // 寫入 Sheets
+    const writeRes = await gsWriteAuth({ action:'saveEmployee', data:emp });
+    console.log('[addEmp] gsWrite 回應:', writeRes);
+
+    // 從 Sheets 拉取最新名單
+    await new Promise(r => setTimeout(r, 1500));
+    const res = await gsGet('getEmployees');
+    console.log('[addEmp] Sheets 回傳員工人數:', res?.employees?.length);
+    if(res.status === 'ok' && res.employees && res.employees.length > 0){
+      // 列印每位員工的 pid 來看是否一致
+      console.log('[addEmp] Sheets 中的員工:');
+      res.employees.forEach(e => console.log('  ', JSON.stringify({eid:e.eid, pid:e.pid, name:e.name})));
+      console.log('[addEmp] 比對目標 pid:', JSON.stringify(p.id));
+      employees = res.employees;
+    }
+
+    console.log('[addEmp] 最終 employees 陣列長度:', employees.length);
+    console.log('[addEmp] renderEmpList 過濾條件 pid:', JSON.stringify(p.id));
+  } catch(e){
+    console.error('[addEmp] 失敗:', e);
+  }
+
+  setLoading(false);
+  renderEmpList();
+  showToast(isEdit ? '✅ 員工資料已更新！' : '✅ 員工已新增！');
+  startAutoSync(parseInt(config.sync_interval)||30);
+  console.log('[addEmp] 結束');
+}
+
+async function delEmp(eid, pid){
+  // 找出該員工所有預約
+  const empBookings = bookings.filter(b =>
+    String(b.eid)===String(eid) && String(b.pid)===String(pid)
+  );
+  const msg = empBookings.length > 0
+    ? `確定刪除員工 ${eid}？\n此員工有 ${empBookings.length} 筆預約紀錄將一併刪除。`
+    : `確定刪除員工 ${eid} 的名單？`;
+  if(!confirm(msg))return;
+
+  // 前端先移除（員工 + 預約）
+  employees = employees.filter(e=>!(String(e.eid)===String(eid)&&String(e.pid)===String(pid)));
+  bookings  = bookings.filter(b=>!(String(b.eid)===String(eid)&&String(b.pid)===String(pid)));
+
+  setLoading(true,'刪除中…');
+  stopAutoSync();
+
+  try {
+    // 刪除員工
+    await gsWriteAuth({ action:'deleteEmployee', eid, pid });
+    // 同步刪除該員工所有預約
+    for(const bk of empBookings){
+      await gsWrite({ action:'deleteBooking', id: bk.id });
+    }
+  } catch(e){}
+
+  await new Promise(r => setTimeout(r, 2000));
+  try {
+    const res = await gsGet('getBootData');
+    if(res.status === 'ok'){
+      employees = res.employees || [];
+      bookings  = res.bookings  || [];
+    }
+  } catch(e){}
+
+  setLoading(false);
+  renderEmpList();
+  // 若統計頁正在顯示，重新渲染
+  if(document.querySelector('.page.active')?.id === 'page-stats') renderStats();
+  showToast(empBookings.length > 0
+    ? `✅ 已刪除員工及 ${empBookings.length} 筆預約`
+    : '✅ 已刪除');
+  startAutoSync(parseInt(config.sync_interval)||30);
+}
+
+async function clearAllEmps(){
+  const p=CP(); if(!p)return;
+  const projBookings = bookings.filter(b=>String(b.pid)===String(p.id));
+  const msg = projBookings.length > 0
+    ? `確定清空「${p.co} — ${p.name}」的所有員工名單？\n此專案有 ${projBookings.length} 筆預約紀錄將一併刪除。`
+    : `確定清空「${p.co} — ${p.name}」的所有員工名單？`;
+  if(!confirm(msg))return;
+
+  employees = employees.filter(e=>String(e.pid)!==String(p.id));
+  bookings  = bookings.filter(b=>String(b.pid)!==String(p.id));
+
+  setLoading(true,'清空中…');
+  try {
+    await gsWriteAuth({ action:'saveEmployees', data:[{pid:p.id}] }); // 觸發清空該專案
+    for(const bk of projBookings){
+      await gsWrite({ action:'deleteBooking', id: bk.id });
+    }
+  } catch(e){}
+  setLoading(false);
+  renderEmpList();
+  if(document.querySelector('.page.active')?.id === 'page-stats') renderStats();
+  showToast(projBookings.length > 0
+    ? `✅ 名單與 ${projBookings.length} 筆預約已清空`
+    : '✅ 名單已清空');
+}
+
+function importEmpFile(input){
+  const p=CP(); if(!p){ showToast('請先選擇專案'); return; }
+  const file=input.files[0]; if(!file)return;
+  const ext = file.name.toLowerCase().split('.').pop();
+
+  if(ext === 'xlsx' || ext === 'xls'){
+    // Excel 處理
+    if(typeof XLSX === 'undefined'){
+      showToast('Excel 套件載入中，請稍後再試');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type:'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+        if(!rows.length){ showToast('Excel 檔案為空'); return; }
+
+        // 偵測標題列並轉為陣列
+        const firstRow = rows[0].map(c => String(c).toLowerCase().trim());
+        const hasHeader = firstRow.some(c => c.includes('eid') || c.includes('員工'));
+        const dataRows = hasHeader ? rows.slice(1) : rows;
+
+        // 解析每列
+        const parsed=[];
+        for(const r of dataRows){
+          if(!r[0])continue;
+          parsed.push({
+            eid: String(r[0]).trim(),
+            name: String(r[1]||'').trim(),
+            birthday: String(r[2]||'').trim(),
+            idno: String(r[3]||'').trim().toUpperCase(),
+            email: String(r[4]||'').trim(),
+            dept: String(r[5]||'').trim(),
+            pid: p.id
+          });
+        }
+        await processImportedEmployees(parsed, p);
+      } catch(err){
+        showToast('Excel 解析失敗：' + err.message);
+      }
+      input.value='';
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    // CSV 處理（沿用舊邏輯）
+    importCSV(input);
+  }
+}
+
+// 處理解析後的員工資料（合併匯入）
+async function processImportedEmployees(parsed, p){
+  if(!parsed.length){ showToast('未讀取到有效資料'); return; }
+
+  const existing = employees.filter(e=>String(e.pid)===String(p.id));
+  const csvEids = new Set(parsed.map(e => String(e.eid)));
+  let updated = 0, added = 0;
+  parsed.forEach(np => {
+    if(existing.some(e => String(e.eid) === String(np.eid))) updated++;
+    else added++;
+  });
+
+  const msg = `即將匯入 ${parsed.length} 筆員工資料：\n• 新增 ${added} 位\n• 更新 ${updated} 位\n\n原有的其他員工不會被刪除，是否確定？`;
+  if(!confirm(msg))return;
+
+  const otherProjects = employees.filter(e=>String(e.pid)!==String(p.id));
+  const keptExisting = existing.filter(e => !csvEids.has(String(e.eid)));
+  employees = [...otherProjects, ...keptExisting, ...parsed];
+
+  setLoading(true,`匯入 ${parsed.length} 筆員工資料…`);
+  stopAutoSync();
+  try {
+    for(const emp of parsed){
+      await gsWriteAuth({ action:'saveEmployee', data:emp });
+    }
+  } catch(err){}
+  await new Promise(r => setTimeout(r, 2000));
+  try {
+    const res = await gsGet('getBootData');
+    if(res.status === 'ok') employees = res.employees || [];
+  } catch(e){}
+  setLoading(false);
+  renderEmpList();
+  showToast(`✅ 已新增 ${added} 位、更新 ${updated} 位員工`);
+  startAutoSync(parseInt(config.sync_interval)||30);
+}
+
+// 下載 Excel 範例
+function downloadSampleExcel(){
+  if(typeof XLSX === 'undefined'){ showToast('Excel 套件載入中'); return; }
+  const data = [
+    { eid:'E001', name:'王小明', birthday:'19900523', idno:'A123456789', email:'wang@company.com', dept:'工程部' },
+    { eid:'E002', name:'李小華', birthday:'19851015', idno:'B234567890', email:'lee@company.com', dept:'業務部' },
+    { eid:'E003', name:'陳小美', birthday:'20000301', idno:'C345678901', email:'chen@company.com', dept:'行銷部' }
+  ];
+  const ws = XLSX.utils.json_to_sheet(data);
+  ws['!cols'] = [{wch:10},{wch:12},{wch:12},{wch:14},{wch:24},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '員工名單');
+  XLSX.writeFile(wb, '員工名單範例.xlsx');
+}
+
+function importCSV(input){
+  const p=CP(); if(!p){ showToast('請先選擇專案'); return; }
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const text=e.target.result;
+    const lines=text.split(String.fromCharCode(10)).map(l=>l.replace(String.fromCharCode(13),'').trim()).filter(l=>l);
+    if(!lines.length){ showToast('CSV 檔案為空'); return; }
+    // 偵測標題列
+    const firstLine=lines[0].toLowerCase();
+    const hasHeader=firstLine.includes('eid')||firstLine.includes('員工');
+    const dataLines=hasHeader?lines.slice(1):lines;
+    const parsed=[];
+    for(const line of dataLines){
+      const cols=line.split(',').map(c=>c.replace(/^"|"$/g,'').trim());
+      if(!cols[0])continue;
+      parsed.push({ eid:cols[0], name:cols[1]||'', birthday:cols[2]||'', idno:(cols[3]||'').toUpperCase(), email:cols[4]||'', dept:cols[5]||'', pid:p.id });
+    }
+    await processImportedEmployees(parsed, p);
+    input.value='';
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function downloadSampleCSV(){
+  const csv='eid,name,birthday,idno,email,dept\nE001,王小明,19900523,A123456789,wang@company.com,工程部\nE002,李小華,19851015,B234567890,lee@company.com,業務部\nE003,陳小美,20000301,C345678901,chen@company.com,行銷部';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='員工名單範例.csv'; a.click();
+}
+
+function resetEmpLoginForm(){
+  document.getElementById('emp-login-id').value='';
+  document.getElementById('emp-login-bday').value='';
+  document.getElementById('emp-verify-result').style.display='none';
+  document.getElementById('lerr').style.display='none';
+  const btn=document.getElementById('emp-verify-btn');
+  btn.textContent='驗證身份 →';
+  btn.onclick=verifyAndLogin;
+  btn.disabled=false;
+  verifiedEmployees=[];
+}
+
+/* ══════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════ */
+function showLogin(){
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('ubadge').style.display='none';
+  document.getElementById('logout-btn').style.display='none';
+  document.getElementById('tp').style.display='none';
+  document.getElementById('sidebar').style.display='none';
+  document.body.classList.remove('emode');
+  document.getElementById('lerr').style.display='none';
+}
+
+function openAdmLogin(){ document.getElementById('adm-user').value=''; document.getElementById('adm-pass').value=''; document.getElementById('adm-lerr').style.display='none'; document.getElementById('adm-mbd').classList.add('open'); setTimeout(()=>document.getElementById('adm-user').focus(),100); }
+
+function doAdmLogin(){
+  const user=document.getElementById('adm-user').value.trim(), pass=document.getElementById('adm-pass').value;
+  const ok = (user === (config.admin_user||'admin')) && (pass === (config.admin_pass||'admin1234'));
+  if(!ok){ const e=document.getElementById('adm-lerr'); e.textContent='帳號或密碼錯誤'; e.style.display=''; return; }
+  closeM('adm-mbd');
+  curUser = { role:'admin', name: config.admin_name||user };
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('ubadge').style.display='';
+  document.getElementById('logout-btn').style.display='';
+  document.getElementById('uavatar').textContent='⚙️';
+  document.getElementById('ubname').textContent=curUser.name;
+  document.getElementById('ubrole').textContent='管理員';
+  document.getElementById('sidebar').style.display='';
+  document.body.classList.remove('emode');
+  // 資料已在開機時載入完畢，直接渲染
+  renderList(); renderGrid();
+  if(projects.length){
+    selP(projects[0].id, false);
+    showAdmin('setup'); // 直接顯示第一個專案的設定
+  } else {
+    showProjPage(); // 無專案則顯示「新增專案」頁
+  }
+}
+
+let verifiedEmployees = []; // 驗證成功後暫存
+
+async function verifyAndLogin(){
+  const eid = document.getElementById('emp-login-id').value.trim();
+  const bday = document.getElementById('emp-login-bday').value.trim();
+  const errEl = document.getElementById('lerr');
+  const showErr = m => { errEl.textContent=m; errEl.style.display=''; };
+  errEl.style.display='none';
+  if(!eid){ showErr('請輸入員工編號'); return; }
+  if(!bday||bday.length!==8||!/^\d{8}$/.test(bday)){ showErr('請輸入8位數出生年月日，例：19900523'); return; }
+
+  const btn = document.getElementById('emp-verify-btn');
+  btn.textContent='驗證中…'; btn.disabled=true;
+
+  try {
+    // birthday 從 Sheets 讀回可能是 Date 物件，統一轉成純數字字串比對
+    const normBday = b => {
+      if(!b) return '';
+      const s = String(b).trim();
+      // 純數字（如 19900523）直接回傳
+      if(/^\d{8}$/.test(s)) return s;
+      // Date 物件或 ISO 字串，取 YYYYMMDD
+      const d = new Date(b);
+      if(!isNaN(d.getTime())){
+        // 加 8 小時轉台灣時間
+        const local = new Date(d.getTime() + 8*60*60*1000);
+        const y = local.getUTCFullYear();
+        const m = String(local.getUTCMonth()+1).padStart(2,'0');
+        const dd = String(local.getUTCDate()).padStart(2,'0');
+        return y+m+dd;
+      }
+      // 移除所有非數字
+      return s.replace(/\D/g,'').slice(0,8);
+    };
+
+    // 階段二：登入時才向後端取員工資料（員工本人的個資 + 預約 + 對應專案）
+    let matched = [];
+    try {
+      const res = await gsGet('getEmployeeData&eid=' + encodeURIComponent(eid) + '&birthday=' + encodeURIComponent(bday));
+      if(res?.status === 'ok'){
+        matched = res.employees || [];
+        // 登入成功，把該員工的預約與專案資料載入前端
+        if(res.bookings) bookings = res.bookings;
+        if(res.projects){
+          // 合併員工專案到 projects 陣列（覆蓋公開資料）
+          res.projects.forEach(rp => {
+            const idx = projects.findIndex(p => String(p.id)===String(rp.id));
+            if(idx >= 0) projects[idx] = rp;
+            else projects.push(rp);
+          });
+        }
+      }
+    } catch(e2){
+      console.error('[verifyAndLogin] 後端錯誤:', e2);
+    }
+
+    btn.textContent='驗證身份 →'; btn.disabled=false;
+
+    if(!matched.length){
+      // 後端會回 status:error，這裡無法區分員編錯/生日錯（後端為了安全只回統一訊息）
+      showErr('❌ 員工編號或出生年月日有誤，請重新確認');
+      document.getElementById('emp-verify-result').style.display='none';
+      document.getElementById('emp-login-bday').value='';
+      document.getElementById('emp-login-bday').focus();
+      return;
+    }
+
+    verifiedEmployees = matched;
+    const resultBox = document.getElementById('emp-verify-result');
+    const multiSel = document.getElementById('verify-multi-sel');
+    const projSel = document.getElementById('verify-proj-sel');
+
+    // 顯示姓名
+    document.getElementById('verify-name').textContent = matched[0].name || eid;
+
+    if(matched.length === 1){
+      // 只有一個活動
+      multiSel.style.display='none';
+      const p = P(matched[0].pid);
+      document.getElementById('verify-proj').textContent = p ? (p.co + ' — ' + p.name) : matched[0].pid;
+    } else {
+      // 多個活動，顯示選擇器
+      multiSel.style.display='';
+      projSel.innerHTML = matched.map(e => {
+        const p = P(e.pid);
+        return `<option value="${e.pid}">${p ? p.co+' — '+p.name : e.pid}</option>`;
+      }).join('');
+      document.getElementById('verify-proj').textContent = '您有 '+matched.length+' 個體檢活動';
+    }
+    resultBox.style.display='';
+    btn.textContent='開始預約體檢 →';
+    btn.onclick = confirmEmpLogin;
+  } catch(err) {
+    btn.textContent='驗證身份 →'; btn.disabled=false;
+    showErr('驗證失敗，請稍後再試');
+  }
+}
+
+function confirmEmpLogin(){
+  const errEl = document.getElementById('lerr'); errEl.style.display='none';
+  let pid;
+  if(verifiedEmployees.length===1){
+    pid = verifiedEmployees[0].pid;
+  } else {
+    pid = document.getElementById('verify-proj-sel').value;
+  }
+  const emp = verifiedEmployees.find(e=>e.pid===pid) || verifiedEmployees[0];
+  const eid = emp.eid;
+  // 把 birthday 也存進 curUser，員工要查身分證時用
+  curUser = { role:'employee', eid:String(eid), pid, name:emp.name||String(eid), birthday: String(emp.birthday||'') };
+  cid = pid;
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('ubadge').style.display='';
+  document.getElementById('logout-btn').style.display='';
+  document.getElementById('uavatar').textContent='👤';
+  document.getElementById('ubname').textContent = emp.name||String(eid);
+  document.getElementById('ubrole').textContent='員工';
+  document.body.classList.add('emode');
+  document.getElementById('e-eid').value=String(eid);
+  if(emp.name) document.getElementById('e-name').value=emp.name;
+  if(emp.dept) document.getElementById('e-dept').value=emp.dept;
+  if(emp.email){ const ef=document.getElementById('e-email'); if(ef) ef.value=emp.email; }
+  // 員工本人取回明文身分證（從後端取得，前端不再持有金鑰）
+  if(emp.idno && curUser?.eid && curUser?.birthday){
+    gsGet(`getEmployeeIdno&eid=${encodeURIComponent(curUser.eid)}&birthday=${encodeURIComponent(curUser.birthday)}`)
+      .then(res => {
+        if(res?.status === 'ok' && res.idno){
+          const idField = document.getElementById('e-idno');
+          if(idField) idField.value = res.idno;
+        }
+      }).catch(()=>{});
+  }
+  // 進入員工首頁（查詢、取消或新增預約）
+  showEmpHome();
+}
+
+function doEmpLogin(){ verifyAndLogin(); } // 相容舊呼叫
+
+function doLogout(){
+  if(!confirm('確定要登出嗎？'))return;
+
+  // 1. 停止背景同步
+  stopAutoSync();
+
+  // 1.5. 通知後端銷毀 token（管理員專屬）
+  if(adminToken){
+    gsGet('adminLogout&token=' + encodeURIComponent(adminToken)).catch(()=>{});
+    adminToken = null;
+  }
+
+  // 2. 清除所有使用者狀態變數
+  curUser = null;
+  cid = null;
+  verifiedEmployees = [];
+  solderAnswers = { sq1: null, sq2: null };
+  sqEnabled = false;
+  pmEnabled = false;
+  eDate = null;
+  eTime = null;
+
+  // 3. 清空所有表單欄位（員工登入 + 預約 + 管理員登入）
+  const fieldsToReset = [
+    'emp-login-id', 'emp-login-bday',
+    'e-name', 'e-eid', 'e-email', 'e-ph', 'e-dept', 'e-note', 'e-idno',
+    'adm-user', 'adm-pass',
+    'new-emp-eid', 'new-emp-name', 'new-emp-bday', 'new-emp-idno', 'new-emp-email', 'new-emp-dept',
+    'ev-name','ev-co','ev-loc','ev-ct','ev-s','ev-e','am-s','am-e','pm-s','pm-e',
+    'csv-upload'
+  ];
+  fieldsToReset.forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.value=''; el.defaultValue=''; }
+  });
+
+  // 4. 清除焊錫問卷選項
+  document.querySelectorAll('input[name="sq1"], input[name="sq2"]').forEach(el => el.checked = false);
+
+  // 5. 清除問卷勾選
+  const qChk = document.getElementById('q-confirm');
+  if(qChk) qChk.checked = false;
+
+  // 6. 隱藏所有狀態元件
+  document.getElementById('ubadge').style.display = 'none';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('tp').style.display = 'none';
+  document.getElementById('sidebar').style.display = 'none';
+  document.body.classList.remove('emode');
+
+  // 7. 關閉所有開啟中的 modal
+  document.querySelectorAll('.mbd.open, .adm-mbd.open').forEach(m => m.classList.remove('open'));
+
+  // 8. 重置頁面狀態（移除所有 active page）
+  document.querySelectorAll('.page.active').forEach(p => p.classList.remove('active'));
+
+  // 9. 防止瀏覽器自動填入：暫時禁用 autocomplete
+  setTimeout(() => {
+    document.querySelectorAll('input').forEach(el => {
+      el.setAttribute('autocomplete', 'off');
+      el.setAttribute('autocorrect', 'off');
+    });
+  }, 100);
+
+  // 10. 重置員工登入表單
+  resetEmpLoginForm();
+
+  // 11. 顯示登入頁
+  showLogin();
+
+  // 12. 顯示登出成功提示
+  showToast('✅ 已安全登出');
+
+  // 13. 額外安全：強制重新載入頁面（公共電腦最安全做法）
+  setTimeout(() => {
+    // 清除 URL 參數，避免管理員入口痕跡
+    if(window.location.search){
+      window.location.href = window.location.pathname;
+    } else {
+      window.location.reload();
+    }
+  }, 800);
+}
+
+/* ══════════════════════════════════════════
+   PROJECT LIST & GRID
+══════════════════════════════════════════ */
+function renderList(){
+  const el=document.getElementById('plist');
+  if(!projects.length){ el.innerHTML='<div style="padding:1rem;font-size:12px;color:var(--gray-400);text-align:center">尚無專案</div>'; return; }
+  el.innerHTML='';
+  projects.forEach(p=>{
+    const cnt=PB(p.id).length, d=document.createElement('div');
+    d.className='pitem'+(p.id===cid?' active':'');
+    d.innerHTML=`<div class="pc" style="background:${p.color||'#0F6E56'}"></div><span class="pn">${p.co}</span><span class="pbadge">${cnt}</span>`;
+    d.onclick=()=>selP(p.id); el.appendChild(d);
+  });
+}
+function renderGrid(){
+  const g=document.getElementById('proj-grid'); g.innerHTML='';
+  projects.forEach(p=>{
+    const cnt=PB(p.id).length, ds=dRange(p.s||'2099-01-01',p.e||'2099-01-01');
+    let tc=0; ds.forEach(d=>Object.values(p.slots||{}).reduce?.(()=>{},0)); // simplified
+    ds.forEach(d=>{ Object.values(p.slots?.[d]||{}).forEach(s=>tc+=(s.cap??p.cap??30)); });
+    const pct=tc?Math.round(cnt/tc*100):0, fc=pct>=90?'var(--red-400)':pct>=60?'var(--amber-400)':'var(--teal-400)';
+    const card=document.createElement('div'); card.className='pcard';
+    card.innerHTML=`<div class="pcard-accent" style="background:${p.color||'#0F6E56'}"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+        <div><div style="font-size:15px;font-weight:500">${p.name}</div><div style="font-size:12px;color:var(--gray-400)">${p.co}</div></div>
+        <span style="font-size:11px;background:${p.color}22;color:${p.color};padding:3px 8px;border-radius:10px;font-weight:500;white-space:nowrap">${p.s||'—'}～${p.e||'—'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">📍 ${p.loc||'未設定地點'}</div>
+      <div style="display:flex;gap:14px;padding-top:8px;border-top:1px solid var(--gray-50)">
+        <div style="font-size:12px;color:var(--gray-600)"><strong style="font-size:16px;font-weight:500;display:block">${cnt}</strong>已預約</div>
+        <div style="font-size:12px;color:var(--gray-600)"><strong style="font-size:16px;font-weight:500;display:block">${tc||'—'}</strong>總容量</div>
+        <div style="font-size:12px;color:var(--gray-600)"><strong style="font-size:16px;font-weight:500;display:block">${ds.length}</strong>天</div>
+      </div>
+      <div class="cb" style="margin-top:10px;height:5px"><div class="cbf" style="width:${pct}%;background:${fc}"></div></div>
+      <div style="display:flex;gap:6px;margin-top:12px">
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();selP('${p.id}');showAdmin('setup')">設定</button>
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();selP('${p.id}');showAdmin('bk')">名單</button>
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();selP('${p.id}');showAdmin('stats')">統計</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();delP('${p.id}')">刪除</button>
+      </div>`;
+    card.onclick=()=>{ selP(p.id); showAdmin('setup'); };
+    g.appendChild(card);
+  });
+  const add=document.createElement('div'); add.className='pcard padd';
+  add.innerHTML='<div style="font-size:28px">＋</div><div style="font-size:13px;font-weight:500">新增公司專案</div>';
+  add.onclick=openNP; g.appendChild(add);
+}
+function selP(id, autoNav){
+  cid=id; const p=P(id); if(!p)return;
+  document.getElementById('tp').style.display='';
+  document.getElementById('tdot').style.background=p.color||'var(--teal-100)';
+  document.getElementById('tname').textContent=p.co+' — '+p.name;
+  renderList();
+  // 切換專案後自動跳到該專案的活動設定
+  // autoNav=false 表示不跳頁（例如初始化時）
+  if(autoNav !== false){
+    showAdmin('setup');
+  }
+}
+
+/* ══════════════════════════════════════════
+   NEW PROJECT
+══════════════════════════════════════════ */
+function openNP(){ ['np-co','np-nm','np-lo','np-s','np-e'].forEach(id=>document.getElementById(id).value=''); selC='#0F6E56'; document.querySelectorAll('.csw').forEach((s,i)=>s.classList.toggle('sel',['#0F6E56','#534AB7','#185FA5','#BA7517','#A32D2D','#3C3489'][i]===selC)); document.getElementById('modal-np').classList.add('open'); }
+function pickC(el){ document.querySelectorAll('.csw').forEach(s=>s.classList.remove('sel')); el.classList.add('sel'); selC=el.dataset.c; }
+async function createProj(){
+  const co=document.getElementById('np-co').value.trim(), name=document.getElementById('np-nm').value.trim();
+  if(!co||!name){ showToast('請填寫公司名稱與活動名稱'); return; }
+  const s=document.getElementById('np-s').value, e=document.getElementById('np-e').value;
+  // 讀取自訂日期 checkbox 狀態（若 checkbox 不存在則為 false）
+  const useCustom = document.getElementById('np-custom')?.checked || false;
+  // 處理自訂日期：若有勾選則用 npEnabledDates，否則用全範圍
+  const finalEnabledDates = useCustom ? [...npEnabledDates] : [];
+  const p={ id:uid(), co, name, loc:document.getElementById('np-lo').value.trim(), contact:'', color:selC,
+    s, e, amS:'08:00', amE:'12:00', hasPM:false, pmS:'', pmE:'', iv:30, cap:30, slots:{},
+    enabledDates: finalEnabledDates,
+    sqEnable:false, qEnable:true, qUrl:'https://examine.h2u.io/MobileRegister_tpshow/', qDesc:'請先完成伊克希曼健檢線上問卷（約 5–10 分鐘），填寫完成後返回本頁面勾選確認，即可繼續預約。',
+    cfS:'【體檢預約確認】您的體檢預約已成立', cfB:dCF(),
+    rmS:'【體檢提醒】明天是您的體檢日，請準時到場', rmB:dRM(), rmT:'17:00' };
+  // 用 projectDates 取得實際日期（含自訂篩選），生成 slots
+  if(s&&e){
+    const ts=gT(p);
+    const ds = projectDates(p);
+    ds.forEach(d=>{ p.slots[d]={}; ts.forEach(t=>{p.slots[d][t]={cap:p.cap};}); });
+  }
+  projects.push(p);
+  closeM('modal-np');
+  setLoading(true,'儲存至 Google Sheets…');
+  const createData = {...p,
+    s: String(p.s||''), e: String(p.e||''),
+    amS:String(p.amS), amE:String(p.amE),
+    pmS:String(p.pmS||''), pmE:String(p.pmE||''),
+    enabledDates: JSON.stringify(p.enabledDates||[])
+  };
+  try {
+    const res = await gsWriteAuth({ action:'saveProject', data:createData });
+    setLoading(false);
+    selP(p.id); renderList(); renderGrid(); showAdmin('setup');
+    if(res && res.status === 'ok'){
+      showToast('✅ 專案「'+co+'」已建立！');
+    } else {
+      showToast('✅ 專案「'+co+'」已建立！');
+    }
+  } catch(e){
+    setLoading(false);
+    selP(p.id); renderList(); renderGrid(); showAdmin('setup');
+    showToast('⚠ 專案建立成功但儲存失敗：' + e.message);
+  }
+}
+async function delP(id){
+  if(!confirm('確定刪除此專案？相關預約也將一併刪除。'))return;
+  projects=projects.filter(p=>p.id!==id); bookings=bookings.filter(b=>b.pid!==id);
+  if(cid===id){ cid=null; document.getElementById('tp').style.display='none'; }
+  setLoading(true,'刪除中…');
+  try { await gsWriteAuth({ action:'deleteProject', id }); } catch(e){}
+  setLoading(false);
+  renderGrid(); renderList(); showToast('已刪除');
+}
+
+/* ══════════════════════════════════════════
+   SETUP
+══════════════════════════════════════════ */
+/* ══ GS URL MANAGEMENT ══ */
+function showSysPage(){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-sys').classList.add('active');
+  showPage('page-sys');
+  syncGsUrlField();
+}
+async function initSheets(){
+  if(!GS_URL){ showToast('請先填寫並儲存 Apps Script 網址'); return; }
+  setLoading(true,'初始化試算表…');
+  try {
+    const res = await gsGet('init');
+    setLoading(false);
+    if(res.status==='ok') showToast('✅ 試算表初始化完成！');
+    else showToast('初始化失敗：'+(res.message||''));
+  } catch(e) {
+    setLoading(false);
+    showToast('⚠ 連線失敗，請確認網址');
+  }
+}
+function syncGsUrlField(){
+  updateGsStatusDot();
+}
+function updateGsStatusDot(){
+  const dot = document.getElementById('gs-status-dot');
+  const txt = document.getElementById('gs-status-text');
+  if(!dot||!txt) return;
+  if(GS_URL){ dot.style.background='var(--teal-400)'; txt.textContent='已設定'; }
+  else { dot.style.background='var(--gray-300)'; txt.textContent='尚未設定'; }
+}
+function saveGsUrl(){
+  showToast('ℹ️ 網址已固定寫入系統，無需手動變更');
+}
+async function testGsConn(){
+  if(!GS_URL){ showToast('請先填寫 Apps Script 網址'); return; }
+  const dot=document.getElementById('gs-status-dot'), txt=document.getElementById('gs-status-text');
+  dot.style.background='var(--amber-400)'; txt.textContent='測試中…';
+  try {
+    await fetch(GS_URL, { mode:'no-cors' });
+    dot.style.background='var(--teal-400)'; txt.textContent='✓ 連線正常';
+    showToast('✅ 連線成功！');
+  } catch(e) {
+    dot.style.background='var(--red-400)'; txt.textContent='✗ 連線失敗';
+    showToast('⚠ 連線失敗，請確認網址');
+  }
+}
+async function changeSyncInterval(val){
+  const sec = parseInt(val);
+  if(sec === 0){ stopAutoSync(); showToast('已停用自動同步'); }
+  else { startAutoSync(sec); showToast('自動同步已設為每 '+sec+' 秒'); }
+  // 存入 Sheets config
+  config.sync_interval = sec;
+  try { await gsWriteAuth({ action:'saveConfig', data:config }); } catch(e){}
+}
+
+async function reloadFromSheets(){
+  if(!GS_URL){ showToast('請先設定 Apps Script 網址'); return; }
+  setLoading(true,'從 Google Sheets 重新載入…');
+  try {
+    const [allRes, cfgRes, empRes] = await Promise.all([gsGet('getAll'), gsGet('getConfig'), gsGet('getEmployees')]);
+    if(allRes.status==='ok'){ projects=allRes.projects||[]; bookings=allRes.bookings||[]; }
+    if(cfgRes.status==='ok') config=cfgRes.config||{};
+    if(empRes.status==='ok') employees=empRes.employees||[];
+    setLoading(false);
+    renderList(); renderGrid();
+    if(cid) { const p=CP(); if(p){ document.getElementById('tname').textContent=p.co+' — '+p.name; } }
+    showToast('✅ 資料已重新載入！');
+  } catch(e) {
+    setLoading(false);
+    showToast('⚠ 載入失敗：'+e.message);
+  }
+}
+
+
+/* ══ SPECIAL QUESTIONNAIRE (SOLDER) ══ */
+let sqEnabled = false; // 目前專案是否啟用特殊問卷
+let solderAnswers = { sq1: null, sq2: null }; // 員工填答結果
+
+function setSQToggle(val){
+  console.log('[setSQToggle] 切換為:', val);
+  sqEnabled = val;
+  const track = document.getElementById('sq-track');
+  const thumb = document.getElementById('sq-thumb');
+  if(track) track.style.background = val ? 'var(--teal-600)' : 'var(--gray-200)';
+  if(thumb) thumb.style.left = val ? '21px' : '3px';
+  const preview = document.getElementById('sq-preview');
+  if(preview) preview.style.display = val ? '' : 'none';
+}
+function toggleSQ(){ setSQToggle(!sqEnabled); }
+
+function onSQ1Change(){
+  const val = document.querySelector('input[name="sq1"]:checked')?.value;
+  // Q2 只在「有」時顯示
+  document.getElementById('sq2-block').style.display = val === 'yes' ? '' : 'none';
+  // 若選「沒有」，清除 Q2 並直接可繼續
+  if(val === 'no'){
+    document.querySelectorAll('input[name="sq2"]').forEach(r=>r.checked=false);
+    solderAnswers = { sq1:'no', sq2: null };
+    document.getElementById('eq-next-btn').disabled = false;
+  } else {
+    solderAnswers = { sq1:'yes', sq2: null };
+    document.getElementById('eq-next-btn').disabled = true;
+  }
+  // 高亮選中的選項
+  ['sq1-yes-label','sq1-no-label'].forEach(id=>{
+    const lbl = document.getElementById(id);
+    const radio = lbl.querySelector('input');
+    lbl.style.borderColor = radio.checked ? 'var(--teal-600)' : 'var(--gray-200)';
+    lbl.style.background = radio.checked ? 'var(--teal-50)' : '';
+  });
+}
+
+// 監聽 Q2 選項（透過 onchange 直接呼叫，避免全域 listener 干擾初始化）
+function onSQ2Change(val){
+  solderAnswers.sq2 = val;
+  const btn = document.getElementById('eq-next-btn');
+  if(btn) btn.disabled = false;
+  ['sq2-yes-label','sq2-no-label'].forEach(id=>{
+    const lbl = document.getElementById(id);
+    if(!lbl) return;
+    const radio = lbl.querySelector('input');
+    lbl.style.borderColor = radio.checked ? 'var(--amber-600)' : 'var(--amber-100)';
+    lbl.style.background = radio.checked ? 'var(--amber-50)' : '#fff';
+  });
+}
+
+function submitSolderQ(){
+  // 記錄答案後進入 Step2
+  const p = CP(); if(!p)return;
+  document.getElementById('e2-info').textContent = '✅ 已選擇：'+fD(eDate)+'  '+eTime;
+  showPage('page-e2');
+}
+
+function resetSolderQ(){
+  solderAnswers = { sq1: null, sq2: null };
+  document.querySelectorAll('input[name="sq1"], input[name="sq2"]').forEach(r=>r.checked=false);
+  document.getElementById('sq2-block').style.display='none';
+  document.getElementById('eq-next-btn').disabled=true;
+  ['sq1-yes-label','sq1-no-label'].forEach(id=>{
+    const lbl=document.getElementById(id);
+    lbl.style.borderColor='var(--gray-200)'; lbl.style.background='';
+  });
+  ['sq2-yes-label','sq2-no-label'].forEach(id=>{
+    const lbl=document.getElementById(id);
+    lbl.style.borderColor='var(--amber-100)'; lbl.style.background='#fff';
+  });
+}
+
+function setPMToggle(val){
+  pmEnabled=val;
+  document.getElementById('pm-track').style.background=val?'var(--teal-600)':'var(--gray-200)';
+  document.getElementById('pm-thumb').style.left=val?'21px':'3px';
+  document.getElementById('pm-fields').style.display=val?'':'none';
+}
+function togglePM(){ setPMToggle(!pmEnabled); }
+function syncSetup(){
+  const p=CP(); if(!p)return;
+  // 將 enabledDates 從 JSON 字串轉回陣列
+  if(typeof p.enabledDates === 'string'){
+    try { p.enabledDates = JSON.parse(p.enabledDates); }
+    catch(e){ p.enabledDates = []; }
+  }
+  if(!Array.isArray(p.enabledDates)) p.enabledDates = [];
+  document.getElementById('setup-title').textContent=p.co+' — 活動設定';
+  document.getElementById('setup-sub').textContent=p.name;
+  document.getElementById('ev-name').value=p.name||'';
+  document.getElementById('ev-co').value=p.co||'';
+  document.getElementById('ev-loc').value=p.loc||'';
+  document.getElementById('ev-ct').value=p.contact||'';
+  document.getElementById('ev-s').value=fmtDate(p.s)||'';
+  document.getElementById('ev-e').value=fmtDate(p.e)||'';
+  // 處理自訂日期模式
+  const allDates = dRange(p.s||'', p.e||'');
+  const useCustom = p.enabledDates && Array.isArray(p.enabledDates) && p.enabledDates.length > 0 && p.enabledDates.length < allDates.length;
+  document.getElementById('ev-custom-dates').checked = useCustom;
+  document.getElementById('ev-date-picker').style.display = useCustom ? '' : 'none';
+  if(useCustom) renderDatePicker();
+  document.getElementById('am-s').value=fmtTime(p.amS)||'08:00';
+  document.getElementById('am-e').value=fmtTime(p.amE)||'12:00';
+  setPMToggle(p.hasPM===true||(!!p.pmS&&p.hasPM!==false));
+  document.getElementById('pm-s').value=fmtTime(p.pmS)||'13:30';
+  document.getElementById('pm-e').value=fmtTime(p.pmE)||'17:00';
+  document.getElementById('ev-iv').value=p.iv||30;
+  document.getElementById('ev-cap').value=p.cap||30;
+  document.getElementById('q-enable').value=p.qEnable!==false?'1':'0';
+  document.getElementById('q-url').value=p.qUrl||'';
+  document.getElementById('q-desc').value=p.qDesc||'';
+  console.log('[syncSetup] 讀取 p.sqEnable:', p.sqEnable, '型別:', typeof p.sqEnable);
+  setSQToggle(p.sqEnable===true||p.sqEnable==='true'||p.sqEnable==='TRUE'||p.sqEnable===1||p.sqEnable==='1');
+  genSlots();
+}
+function genSlots(){
+  const p=CP(), s=document.getElementById('ev-s').value, e=document.getElementById('ev-e').value;
+  if(!s||!e){ document.getElementById('slot-grid').innerHTML='<p class="tm tsm">請先填寫日期範圍</p>'; return; }
+  const amS=document.getElementById('am-s').value||'08:00', amE=document.getElementById('am-e').value||'12:00';
+  const iv=parseInt(document.getElementById('ev-iv').value)||30, dc=parseInt(document.getElementById('ev-cap').value)||30;
+  const times=[];
+  for(let t=t2m(amS);t<t2m(amE);t+=iv)times.push(m2t(t));
+  if(pmEnabled){ const ps=document.getElementById('pm-s').value, pe=document.getElementById('pm-e').value; if(ps&&pe&&t2m(pe)>t2m(ps))for(let t=t2m(ps);t<t2m(pe);t+=iv)times.push(m2t(t)); }
+  // 使用 projectDates 取得實際開放日期（含自訂篩選）
+  const ds = projectDates(p);
+  const ns={};
+  // 比對舊預設值，若 dc 變動則強制重設所有 cap
+  const oldDc = p?._lastDc;
+  const dcChanged = oldDc !== undefined && oldDc !== dc;
+  ds.forEach(d=>{
+    ns[d]={};
+    times.forEach(t=>{
+      // dc 變動時強制重設所有時段；否則保留個別已調整的 cap
+      const oldCap = p?.slots?.[d]?.[t]?.cap;
+      ns[d][t] = { cap: dcChanged ? dc : (oldCap ?? dc) };
+    });
+  });
+  if(p){ p.slots=ns; p._lastDc=dc; }
+  const g=document.getElementById('slot-grid'); g.innerHTML='';
+  const amEnd=document.getElementById('am-e').value||'12:00';
+  const amT=times.filter(t=>t2m(t)<t2m(amEnd)), pmT=times.filter(t=>!amT.includes(t));
+  const addLbl=(txt)=>{ const l=document.createElement('div'); l.style.cssText='grid-column:1/-1;font-size:11px;font-weight:500;color:var(--gray-400);letter-spacing:.06em;text-transform:uppercase;padding:4px 0 2px'; l.textContent=txt; g.appendChild(l); };
+  const addItem=(t,c)=>{ const item=document.createElement('div'); item.className='si'; item.innerHTML=`<span style="font-size:13px;font-weight:500">🕐 ${t}</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:var(--gray-400)">名額</span><input type="number" class="sci" value="${c}" min="1" max="500" onchange="updCap('${t}',this.value)"/></div>`; g.appendChild(item); };
+  if(amT.length){ addLbl('☀ 上午場'); amT.forEach(t=>addItem(t, ns[ds[0]]?.[t]?.cap??dc)); }
+  if(pmT.length){ addLbl('🌙 下午場'); pmT.forEach(t=>addItem(t, ns[ds[0]]?.[t]?.cap??dc)); }
+  showToast('已產生 '+times.length+' 個時段 × '+ds.length+' 天');
+}
+function updCap(t,v){ const p=CP(); if(!p)return; const c=parseInt(v)||30; Object.keys(p.slots||{}).forEach(d=>{ if(p.slots[d][t])p.slots[d][t]={cap:c}; }); }
+async function saveSettings(){
+  const p=CP(); if(!p){ showToast('⚠ 請先選擇專案'); return; }
+  const v = id => document.getElementById(id)?.value || '';
+  p.name = v('ev-name'); p.co = v('ev-co');
+  p.loc = v('ev-loc'); p.contact = v('ev-ct');
+  p.s = v('ev-s').trim(); p.e = v('ev-e').trim();
+  // 處理自訂日期（防呆：若 checkbox 不存在則跳過）
+  const customEl = document.getElementById('ev-custom-dates');
+  if(customEl){
+    if(customEl.checked){
+      p.enabledDates = Array.isArray(p.enabledDates) ? p.enabledDates : [];
+    } else {
+      p.enabledDates = []; // 空陣列表示全部開放
+    }
+  }
+  if(!Array.isArray(p.enabledDates)) p.enabledDates = [];
+  p.amS = v('am-s').trim() || '08:00';
+  p.amE = v('am-e').trim() || '12:00';
+  p.hasPM = pmEnabled;
+  p.pmS = pmEnabled ? v('pm-s').trim() : '';
+  p.pmE = pmEnabled ? v('pm-e').trim() : '';
+  p.iv = parseInt(v('ev-iv')) || 30;
+  p.cap = parseInt(v('ev-cap')) || 30;
+  p.qEnable = v('q-enable') === '1';
+  p.qUrl = v('q-url').trim();
+  p.qDesc = v('q-desc');
+  p.sqEnable = sqEnabled;
+  console.log('[saveSettings] sqEnabled:', sqEnabled, '| p.sqEnable:', p.sqEnable);
+  genSlots();
+  // 確保時間欄位以純字串寫入，避免 Sheets 自動轉型
+  const saveData = {...p,
+    s:   String(p.s||''),
+    e:   String(p.e||''),
+    amS: String(p.amS||'08:00'),
+    amE: String(p.amE||'12:00'),
+    pmS: String(p.pmS||''),
+    pmE: String(p.pmE||''),
+    enabledDates: JSON.stringify(p.enabledDates||[])
+  };
+  setLoading(true,'儲存至 Google Sheets…');
+  try {
+    console.log('[saveSettings] 送出資料 sqEnable:', saveData.sqEnable);
+    const res = await gsWriteAuth({ action:'saveProject', data:saveData });
+    console.log('[saveSettings] 寫入回應:', res);
+    setLoading(false);
+    renderList(); document.getElementById('tname').textContent=p.co+' — '+p.name;
+    console.log('[saveSettings] 回應內容:', JSON.stringify(res));
+    if(res && res.status === 'ok'){
+      showToast('✅ 設定已儲存！');
+    } else if(res && res.status === 'error'){
+      showToast('⚠ 儲存失敗：' + (res.message||'未知錯誤'));
+    } else {
+      // 無法判斷狀態，視為已送出（沒收到回應但實際可能寫入成功）
+      showToast('✅ 設定已儲存！');
+    }
+  } catch(e){
+    setLoading(false);
+    showToast('⚠ 儲存失敗：' + e.message);
+  }
+}
+
+/* ══════════════════════════════════════════
+   BOOKINGS
+══════════════════════════════════════════ */
+function renderBk(){
+  const p=CP(); if(!p)return;
+  document.getElementById('bk-sub').textContent=p.co+' — '+p.name;
+  const sel=document.getElementById('bk-fil'), cur=sel.value;
+  sel.innerHTML='<option value="">全部日期</option>';
+  projectDates(p).forEach(d=>{ const o=document.createElement('option'); o.value=d; o.textContent=fD(d); sel.appendChild(o); });
+  sel.value=cur;
+  const fl=sel.value, list=PB().filter(b=>!fl||(fmtDate(b.date)||b.date)===fl);
+  const tb=document.getElementById('bk-tbody');
+  if(!list.length){ tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--gray-400)">尚無預約紀錄</td></tr>'; return; }
+  tb.innerHTML=list.map(b=>{
+    const bDate = fmtDate(b.date)||b.date||'—';
+    const bTime = fmtTime(b.time)||b.time||'—';
+    return `<tr>
+    <td><strong>${b.name}</strong></td><td>${b.eid}</td>
+    <td style="color:var(--blue-600)">${b.email}</td><td>${b.dept||'—'}</td>
+    <td>${fD(bDate)}</td><td><strong>${bTime}</strong></td>
+    <td>${b.qSkipped?'<span class="badge bw">已略過</span>':'<span class="badge bs">已完成</span>'}</td>
+    <td><span class="badge bs">已確認</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="delBk('${b.id}')">取消</button></td>
+  </tr>`;}).join('');
+}
+async function delBk(id){
+  if(!confirm('確定取消此預約？'))return;
+  bookings=bookings.filter(b=>b.id!==id);
+  setLoading(true,'更新中…');
+  try { await gsWrite({ action:'deleteBooking', id }); } catch(e){}
+  setLoading(false); renderBk(); showToast('預約已取消');
+}
+function exportCSV(){
+  const p=CP(); if(!p)return;
+  const sel=document.getElementById('bk-fil'); const fl=sel?.value||'';
+  const list = bookings.filter(b => String(b.pid)===String(p.id) && (!fl || (fmtDate(b.date)||b.date)===fl));
+  if(!list.length){ showToast('尚無預約資料可匯出'); return; }
+
+  // 依日期、時段排序
+  list.sort((a,b)=>{
+    const da=fmtDate(a.date)||a.date, db=fmtDate(b.date)||b.date;
+    if(da!==db) return da<db?-1:1;
+    const ta=fmtTime(a.time)||a.time, tb=fmtTime(b.time)||b.time;
+    return ta<tb?-1:1;
+  });
+
+  const rows=[['體檢日期','時段','姓名','員工編號','身分證字號','Email','聯絡電話','部門','焊錫作業','鉛暴露','問卷狀態','預約信','檢前通知','備註','預約時間']];
+  list.forEach(b=>rows.push([
+    fmtDate(b.date)||b.date,
+    fmtTime(b.time)||b.time,
+    b.name||'',
+    b.eid||'',
+    maskId(b.idno),
+    b.email||'',
+    b.phone||'',
+    b.dept||'',
+    b.sq1==='yes'?'有':'否',
+    b.sq1==='yes'?(b.sq2==='yes'?'有接觸':'未接觸'):'—',
+    b.qSkipped?'已略過':'已完成',
+    b.confirmMail||'未寄出',
+    b.reminderMail||'未寄出',
+    (b.note||'').replace(/[\r\n]+/g,' '),
+    b.ts||''
+  ]));
+
+  // CSV 字串內處理引號：把欄位內的 " 改為 ""
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const today = new Date().toISOString().slice(0,10);
+  const filename = fl
+    ? `${p.co}_${p.name}_${fl}_預約名單.csv`
+    : `${p.co}_${p.name}_預約名單_${today}.csv`;
+
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=filename;
+  a.click();
+  showToast(`✅ 已匯出 ${list.length} 筆預約資料`);
+}
+
+function exportExcel(){
+  const p=CP(); if(!p)return;
+  if(typeof XLSX === 'undefined'){
+    showToast('Excel 套件載入中，請稍後再試');
+    return;
+  }
+  const sel=document.getElementById('bk-fil'); const fl=sel?.value||'';
+  const list = bookings.filter(b => String(b.pid)===String(p.id) && (!fl || (fmtDate(b.date)||b.date)===fl));
+  if(!list.length){ showToast('尚無預約資料可匯出'); return; }
+
+  // 依日期、時段排序
+  list.sort((a,b)=>{
+    const da=fmtDate(a.date)||a.date, db=fmtDate(b.date)||b.date;
+    if(da!==db) return da<db?-1:1;
+    const ta=fmtTime(a.time)||a.time, tb=fmtTime(b.time)||b.time;
+    return ta<tb?-1:1;
+  });
+
+  // 準備資料（陣列物件格式）
+  const data = list.map(b => ({
+    '體檢日期': fmtDate(b.date)||b.date,
+    '時段': fmtTime(b.time)||b.time,
+    '姓名': b.name||'',
+    '員工編號': b.eid||'',
+    '身分證字號': maskId(b.idno),
+    'Email': b.email||'',
+    '聯絡電話': b.phone||'',
+    '部門': b.dept||'',
+    '焊錫作業': b.sq1==='yes'?'有':'否',
+    '鉛暴露': b.sq1==='yes'?(b.sq2==='yes'?'有接觸':'未接觸'):'—',
+    '問卷狀態': b.qSkipped?'已略過':'已完成',
+    '預約信': b.confirmMail||'未寄出',
+    '檢前通知': b.reminderMail||'未寄出',
+    '備註': b.note||'',
+    '預約時間': b.ts||''
+  }));
+
+  // 建立工作表
+  const ws = XLSX.utils.json_to_sheet(data);
+
+  // 設定欄寬
+  ws['!cols'] = [
+    { wch: 12 }, { wch: 8 }, { wch: 12 }, { wch: 12 }, { wch: 14 },
+    { wch: 24 }, { wch: 14 }, { wch: 12 }, { wch: 10 }, { wch: 10 },
+    { wch: 10 }, { wch: 18 }, { wch: 18 }, { wch: 20 }, { wch: 18 }
+  ];
+
+  // 建立工作簿
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '預約名單');
+
+  // 加入專案資訊工作表
+  const info = [
+    { '項目': '公司名稱', '內容': p.co },
+    { '項目': '專案名稱', '內容': p.name },
+    { '項目': '體檢地點', '內容': p.loc||'—' },
+    { '項目': '聯絡人', '內容': p.contact||'—' },
+    { '項目': '開放期間', '內容': (fmtDate(p.s)||p.s||'—')+' ～ '+(fmtDate(p.e)||p.e||'—') },
+    { '項目': '預約總數', '內容': list.length+' 人' },
+    { '項目': '匯出時間', '內容': new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei'}) }
+  ];
+  const wsInfo = XLSX.utils.json_to_sheet(info);
+  wsInfo['!cols'] = [{ wch: 14 }, { wch: 30 }];
+  XLSX.utils.book_append_sheet(wb, wsInfo, '專案資訊');
+
+  // 下載
+  const today = new Date().toISOString().slice(0,10);
+  const filename = fl
+    ? `${p.co}_${p.name}_${fl}_預約名單.xlsx`
+    : `${p.co}_${p.name}_預約名單_${today}.xlsx`;
+  XLSX.writeFile(wb, filename);
+  showToast(`✅ 已匯出 ${list.length} 筆預約至 Excel`);
+}
+
+async function sendRemindersNow(){
+  const p=CP(); if(!p)return;
+  const projBookings = bookings.filter(b => String(b.pid)===String(p.id) && b.email);
+  if(!projBookings.length){ showToast('無有 Email 的預約紀錄'); return; }
+  if(!confirm(`即將寄送提醒信給 ${projBookings.length} 位預約者，確定嗎？\n\n（注意：每日 Gmail 寄信上限為 100 封）`))return;
+  setLoading(true,`寄送提醒信中…`);
+  try {
+    const res = await gsWriteAuth({ action:'sendReminders', pid:p.id });
+    setLoading(false);
+    if(res && res.status === 'ok'){
+      showToast(`✅ 已寄送 ${res.sent||0} 封，失敗 ${res.failed||0} 封`);
+    } else {
+      showToast('⚠ 寄送可能未完成');
+    }
+  } catch(e){
+    setLoading(false);
+    showToast('⚠ 寄送失敗：' + e.message);
+  }
+}
+
+/* ══════════════════════════════════════════
+   STATS
+══════════════════════════════════════════ */
+function renderStats(){
+  const p=CP(); if(!p)return;
+  document.getElementById('st-sub').textContent=p.co+' — '+p.name;
+  const ds = projectDates(p);
+
+  // 計算總名額（從每個時段的 cap 加總）
+  let tc = 0;
+  ds.forEach(d => Object.values(p.slots?.[d]||{}).forEach(s => tc += (s.cap??p.cap??30)));
+
+  // 用 String 比對避免 pid 型別問題
+  const projBookings = bookings.filter(b => String(b.pid)===String(cid));
+  const cnt = projBookings.length;
+
+  document.getElementById('st-tot').textContent  = cnt;
+  document.getElementById('st-cap').textContent  = tc||'—';
+  document.getElementById('st-rate').textContent = tc?Math.round(cnt/tc*100)+'%':'—';
+  document.getElementById('st-rem').textContent  = tc?(tc-cnt):'—';
+
+  // 各日期 + 各時段詳細狀況
+  const cont = document.getElementById('st-daily');
+  cont.innerHTML='';
+
+  ds.forEach(d => {
+    // 取得這天的時段（從 slots 取出，並用 fmtTime 正規化）
+    const slotsOfDay = p.slots?.[d] || {};
+    const times = Object.keys(slotsOfDay).map(t => fmtTime(t)||t).filter(t=>t).sort();
+    if(!times.length) return;
+
+    // 該日總預約人數（用標準化的 date/time 比對）
+    const dc = projBookings.filter(b => (fmtDate(b.date)||b.date) === d).length;
+    const dcap = Object.values(slotsOfDay).reduce((a,s)=>a+(s.cap??p.cap??30),0);
+    const pct = dcap?Math.round(dc/dcap*100):0;
+    const fc = pct>=90?'var(--red-400)':pct>=60?'var(--amber-400)':'var(--teal-400)';
+
+    // 各時段詳細
+    const timesHtml = times.map(t => {
+      const origKey = Object.keys(slotsOfDay).find(k => (fmtTime(k)||k)===t) || t;
+      const cap = slotsOfDay[origKey]?.cap ?? p.cap ?? 30;
+      const used = projBookings.filter(b =>
+        (fmtDate(b.date)||b.date)===d &&
+        (fmtTime(b.time)||b.time)===t
+      ).length;
+      const rem = cap - used;
+      const tpct = cap ? Math.round(used/cap*100) : 0;
+      const color = tpct>=100?'var(--red-600)':tpct>=80?'var(--amber-600)':rem>0?'var(--teal-600)':'var(--gray-400)';
+      const bgcolor = tpct>=100?'#FEF2F2':tpct>=80?'#FFFBF0':'#F2FAF8';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${bgcolor};border-radius:6px;font-size:12px;min-width:120px;">
+        <span style="font-family:monospace;font-weight:500;color:var(--gray-800)">${t}</span>
+        <span style="color:${color};font-weight:500">${used}/${cap}</span>
+        <span style="color:var(--gray-400);font-size:11px">餘 ${rem}</span>
+      </div>`;
+    }).join('');
+
+    cont.innerHTML += `<div style="margin-bottom:16px;padding:12px 14px;border:.5px solid var(--gray-200);border-radius:10px;background:#fff;">
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:8px">
+        <span style="font-weight:500;color:var(--gray-800)">${fD(d)}</span>
+        <span style="color:var(--gray-600);font-size:12px">總計 <strong style="color:${fc}">${dc}</strong> / ${dcap} 人（${pct}%）</span>
+      </div>
+      <div class="cb" style="margin-bottom:10px"><div class="cbf" style="width:${pct}%;background:${fc}"></div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${timesHtml}</div>
+    </div>`;
+  });
+
+  if(!cont.innerHTML){
+    cont.innerHTML='<p style="text-align:center;color:var(--gray-400);padding:2rem">尚未設定開放日期與時段</p>';
+  }
+}
+
+/* ══════════════════════════════════════════
+   EMAIL
+══════════════════════════════════════════ */
+function syncEmail(){ const p=CP(); if(!p)return; document.getElementById('cf-s').value=p.cfS||''; document.getElementById('cf-b').value=p.cfB||dCF(); document.getElementById('rm-s').value=p.rmS||''; document.getElementById('rm-b').value=p.rmB||dRM(); document.getElementById('rm-t').value=p.rmT||'17:00'; }
+async function saveEmail(){
+  const p=CP(); if(!p)return;
+  p.cfS=document.getElementById('cf-s').value; p.cfB=document.getElementById('cf-b').value;
+  p.rmS=document.getElementById('rm-s').value; p.rmB=document.getElementById('rm-b').value;
+  p.rmT=document.getElementById('rm-t').value;
+  setLoading(true,'儲存至 Google Sheets…');
+  try {
+    const res = await gsWriteAuth({ action:'saveProject', data:p });
+    setLoading(false);
+    if(res && res.status === 'ok'){
+      showToast('✅ 通知設定已儲存！');
+    } else if(res && res.status === 'error'){
+      showToast('⚠ 儲存失敗：' + (res.message||'未知錯誤'));
+    } else {
+      showToast('✅ 設定已儲存！');
+    }
+  } catch(e){ setLoading(false); showToast('⚠ 儲存失敗'); }
+}
+function prevEmail(type){ const p=CP(); if(!p)return; const subj=type==='cf'?document.getElementById('cf-s').value:document.getElementById('rm-s').value; const tpl=type==='cf'?document.getElementById('cf-b').value:document.getElementById('rm-b').value; const body=fT(tpl,{name:'王小明',date:fD(p.s||'2025-05-26'),time:'09:00',location:p.loc,company:p.co+' '+p.name}); document.getElementById('em-t').textContent=type==='cf'?'確認信預覽':'提醒信預覽'; document.getElementById('em-b').innerHTML=eHTML(subj,body); document.getElementById('modal-em').classList.add('open'); }
+
+/* ══════════════════════════════════════════
+   PASSWORD
+══════════════════════════════════════════ */
+function openChpw(){ document.getElementById('chpw-old').value=''; document.getElementById('chpw-new').value=''; document.getElementById('chpw-conf').value=''; document.getElementById('chpw-err').style.display='none'; document.getElementById('modal-chpw').classList.add('open'); }
+async function savePassword(){
+  console.log('[savePassword] 開始');
+  const v = id => document.getElementById(id)?.value || '';
+  const oldPw = v('chpw-old'), nw = v('chpw-new'), cf = v('chpw-conf');
+  const err = document.getElementById('chpw-err');
+  const showE = m => {
+    console.warn('[savePassword] 錯誤訊息:', m);
+    if(err){ err.textContent=m; err.style.display=''; }
+  };
+
+  if(oldPw !== (config.admin_pass||'admin1234')){ showE('目前密碼不正確'); return; }
+  if(nw.length < 6){ showE('新密碼至少需要 6 個字元'); return; }
+  if(nw !== cf){ showE('兩次密碼不一致'); return; }
+
+  stopAutoSync();
+  config.admin_pass = nw;
+  console.log('[savePassword] 送出 config:', JSON.stringify(config));
+
+  setLoading(true, '儲存至 Google Sheets…');
+  try {
+    const res = await gsWriteAuth({ action:'saveConfig', data:config });
+    console.log('[savePassword] 完整回應:', JSON.stringify(res));
+    setLoading(false);
+    // 寬鬆判斷：只要不是明確的 error 就算成功
+    if(res && res.status === 'error'){
+      showE('儲存失敗：' + (res.message || '未知錯誤'));
+    } else {
+      closeM('modal-chpw');
+      showToast('✅ 密碼已變更並儲存！');
+    }
+  } catch(e){
+    setLoading(false);
+    console.error('[savePassword] 例外錯誤:', e);
+    showE('儲存失敗：' + e.message);
+  } finally {
+    startAutoSync(parseInt(config.sync_interval)||30);
+  }
+}
+
+/* ══════════════════════════════════════════
+   EMPLOYEE FLOW
+══════════════════════════════════════════ */
+
+/* ══ EMPLOYEE HOME ══ */
+function showEmpHome(){
+  showPage('page-emp-home');
+  const p = CP();
+  const myBooking = bookings.find(b => String(b.pid) === String(cid) && String(b.eid) === String(curUser?.eid));
+
+  if(myBooking){
+    // 已有預約 → 顯示預約資訊
+    document.getElementById('emp-has-booking').style.display = '';
+    document.getElementById('emp-no-booking').style.display = 'none';
+    document.getElementById('emp-tab-book').style.display = 'none'; // 隱藏新增預約 tab
+
+    document.getElementById('emp-bk-proj').textContent  = p ? (p.co + ' — ' + p.name) : '—';
+    document.getElementById('emp-bk-date').textContent  = fD(fmtDate(myBooking.date)||myBooking.date);
+    document.getElementById('emp-bk-time').textContent  = fmtTime(myBooking.time)||myBooking.time||'—';
+    document.getElementById('emp-bk-loc').textContent   = p?.loc || '—';
+
+    // 焊錫問卷結果
+    if(myBooking.sq1){
+      const solderText = myBooking.sq1 === 'yes'
+        ? ('有焊錫作業' + (myBooking.sq2 === 'yes' ? '，有接觸鉛' : '，未接觸鉛'))
+        : '無焊錫作業';
+      document.getElementById('emp-bk-solder').textContent = solderText;
+      document.getElementById('emp-bk-solder-row').style.display = '';
+    } else {
+      document.getElementById('emp-bk-solder-row').style.display = 'none';
+    }
+  } else {
+    // 尚未預約
+    document.getElementById('emp-has-booking').style.display = 'none';
+    document.getElementById('emp-no-booking').style.display = '';
+    document.getElementById('emp-tab-book').style.display = '';
+    if(p) document.getElementById('emp-no-sub').textContent =
+      p.co + ' — ' + p.name + '　' + (p.s||'') + ' ～ ' + (p.e||'');
+  }
+  document.getElementById('emp-tab-home').classList.add('active');
+  document.getElementById('emp-tab-book').classList.remove('active');
+}
+
+function empTabSwitch(tab){
+  if(tab === 'home'){
+    showEmpHome();
+  } else {
+    // 前往預約流程
+    document.getElementById('emp-tab-home').classList.remove('active');
+    document.getElementById('emp-tab-book').classList.add('active');
+    startEmp();
+  }
+}
+
+async function empCancelBooking(){
+  const myBooking = bookings.find(b => b.pid === cid && b.eid === String(curUser?.eid));
+  if(!myBooking) return;
+  if(!confirm('確定要取消體檢預約嗎？\n取消後若要重新預約，請再次進行預約流程。')) return;
+  bookings = bookings.filter(b => b.id !== myBooking.id);
+  setLoading(true,'取消預約中…');
+  try { await gsWrite({ action:'deleteBooking', id: myBooking.id }); } catch(e){}
+  setLoading(false);
+  showToast('✅ 預約已取消');
+  showEmpHome(); // 重新顯示首頁（會變成尚未預約狀態）
+}
+
+function startEmp(){
+  const p=CP()||projects[0];
+  if(!cid&&p)cid=p.id;
+  if(!p){ showPage('page-e1'); document.getElementById('e-title').textContent='目前尚無開放預約的活動'; return; }
+  qDone=false; qSkipped=false;
+  document.getElementById('skip-banner').style.display='none';
+  if(p.qEnable!==false&&p.qUrl){
+    document.getElementById('q-gate-desc').textContent=p.qDesc||'請先完成伊克希曼健檢線上問卷。';
+    document.getElementById('q-link-btn').href=p.qUrl;
+    document.getElementById('q-conf-row').style.display='none';
+    document.getElementById('q-done-chk').checked=false;
+    document.getElementById('q-proceed-btn').disabled=true;
+    showPage('page-e0');
+  } else { qDone=true; initEmpBooking(); }
+}
+function openQ(){ const p=CP(); if(!p||!p.qUrl)return; window.open(p.qUrl,'_blank'); setTimeout(()=>{ document.getElementById('q-conf-row').style.display='flex'; },2000); return false; }
+function onQCheck(){ const c=document.getElementById('q-done-chk').checked; document.getElementById('q-proceed-btn').disabled=!c; qDone=c; }
+function proceedQ(){ if(!qDone)return; initEmpBooking(); }
+function skipQ(){ if(!confirm('確定略過問卷填寫？'))return; qSkipped=true; qDone=true; document.getElementById('skip-banner').style.display=''; initEmpBooking(); }
+function initEmpBooking(){
+  const p=CP(); if(!p)return;
+  document.getElementById('e-title').textContent=p.name;
+  document.getElementById('e-loc').textContent='📍 '+p.loc+' ｜ '+p.co;
+  eDate=null; eTime=null; renderEmpDates();
+  document.getElementById('e-tc').style.display='none';
+  document.getElementById('e-btn2').disabled=true;
+  // 每次進入預約流程都重新帶入員工個資
+  const emp = (verifiedEmployees||[]).find(e=>String(e.pid)===String(cid)) || verifiedEmployees?.[0];
+  if(emp){
+    const setVal = (id,val) => { const el=document.getElementById(id); if(el&&val) el.value=val; };
+    setVal('e-name',   emp.name);
+    setVal('e-eid',    emp.eid);
+    setVal('e-email',  emp.email);
+    // 從後端取得明文身分證（員工本人才有權限）
+    if(emp.idno && curUser?.eid && curUser?.birthday){
+      gsGet(`getEmployeeIdno&eid=${encodeURIComponent(curUser.eid)}&birthday=${encodeURIComponent(curUser.birthday)}`)
+        .then(res => {
+          if(res?.status === 'ok' && res.idno){ setVal('e-idno', res.idno); }
+        }).catch(()=>{});
+    }
+    if(emp.dept){ const el=document.getElementById('e-dept'); if(el&&emp.dept) el.value=emp.dept; }
+  }
+  showPage('page-e1');
+}
+function renderEmpDates(){
+  const p=CP(); if(!p)return;
+  const g=document.getElementById('e-dates'); g.innerHTML='';
+  // fmtDate 處理 Sheets 可能回傳的 Date 物件
+  if(!fmtDate(p.s)||!fmtDate(p.e)){ g.innerHTML='<p class="tm tsm">尚未設定開放日期，請聯繫人資部門</p>'; return; }
+  // 只顯示有設定時段的日期
+  const ds = projectDates(p).filter(d => {
+    const slotsOfDay = p.slots?.[d] || {};
+    return Object.keys(slotsOfDay).length > 0;
+  });
+  const w=['日','一','二','三','四','五','六'];
+  if(!ds.length){ g.innerHTML='<p class="tm tsm">目前尚無可預約日期，請聯繫人資部門</p>'; return; }
+  ds.forEach(ds2=>{
+    const d=new Date(ds2+'T00:00:00'), c=document.createElement('div');
+    c.className='dc';
+    c.innerHTML=`<div class="wd">週${w[d.getDay()]}</div><div class="dn">${d.getDate()}</div><div class="dm">${d.getMonth()+1}月</div>`;
+    c.onclick=()=>pickD(ds2,c);
+    g.appendChild(c);
+  });
+}
+function pickD(ds,card){
+  document.querySelectorAll('.dc').forEach(c=>c.classList.remove('sel')); card.classList.add('sel');
+  eDate=ds; eTime=null;
+  document.getElementById('e-tt').textContent='🕐 選擇時段 — '+fD(ds);
+  document.getElementById('e-tc').style.display=''; document.getElementById('e-btn2').disabled=true;
+  renderEmpTimes(ds);
+}
+function renderEmpTimes(ds){
+  const p=CP(); if(!p)return; const g=document.getElementById('e-times'); g.innerHTML='';
+  // 嘗試直接用 ds，或用 fmtDate 轉換後的 key
+  const slotsRaw=p.slots||{};
+  let slots=slotsRaw[ds];
+  if(!slots){
+    // 找一個 fmtDate 後相符的 key
+    const matchKey=Object.keys(slotsRaw).find(k=>fmtDate(k)===ds);
+    slots=matchKey?slotsRaw[matchKey]:{};
+  }
+  slots=slots||{};
+  const times=Object.keys(slots).map(t=>fmtTime(t)||t).filter(t=>t).sort();
+  if(!times.length){ g.innerHTML='<p class="tm tsm">此日期尚未設定時段</p>'; return; }
+  times.forEach(t=>{
+    const origKey=Object.keys(slots).find(k=>(fmtTime(k)||k)===t)||t;
+    const c=slots[origKey]?.cap??p.cap??30, bk=bc(p.id,ds,t), rem=c-bk, full=rem<=0;
+    const pct=Math.min(100,Math.round(bk/c*100)), fc=full?'var(--red-400)':rem<=Math.ceil(c*.2)?'var(--amber-400)':'var(--teal-400)';
+    const btn=document.createElement('button'); btn.className='tb'; btn.disabled=full;
+    btn.innerHTML=`<div class="tsl">${t}</div><div class="tav ${full?'afl':rem<=Math.ceil(c*.2)?'afw':'aok'}">${full?'已額滿':'剩 '+rem+' 名'}</div><div class="cb"><div class="cbf" style="width:${pct}%;background:${fc}"></div></div>`;
+    if(!full)btn.onclick=()=>{ document.querySelectorAll('.tb').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); eTime=t; document.getElementById('e-btn2').disabled=false; };
+    g.appendChild(btn);
+  });
+}
+function goStep3(){
+  if(!eDate||!eTime)return;
+  const p=CP();
+  console.log('[goStep3] sqEnable值:', p?.sqEnable, '型別:', typeof p?.sqEnable);
+  if(p && (p.sqEnable===true||p.sqEnable==='true'||p.sqEnable==='TRUE'||p.sqEnable===1||p.sqEnable==='1')){
+    // 先顯示特殊問卷頁
+    resetSolderQ();
+    document.getElementById('eq-title').textContent=p.name;
+    document.getElementById('eq-loc').textContent='📍 '+p.loc+' ｜ '+p.co;
+    showPage('page-eq');
+  } else {
+    document.getElementById('e2-info').textContent='✅ 已選擇：'+fD(eDate)+'  '+eTime;
+    showPage('page-e2');
+  }
+}
+async function submitBooking(){
+  const p=CP(); if(!p)return;
+  const eidField = document.getElementById('e-eid').value.trim();
+  // 防止重複預約：再次檢查該員工是否已在此專案預約
+  if(eidField){
+    const existing = bookings.find(b =>
+      String(b.pid)===String(p.id) && String(b.eid)===String(eidField)
+    );
+    if(existing){
+      showToast('⚠ 您已預約過此活動，請先取消舊預約');
+      showEmpHome();
+      return;
+    }
+  }
+  // 再次檢查時段是否已滿
+  if(eDate && eTime){
+    const slotKey = Object.keys(p.slots?.[eDate]||{}).find(k => (fmtTime(k)||k)===eTime) || eTime;
+    const cap = p.slots?.[eDate]?.[slotKey]?.cap ?? p.cap ?? 30;
+    const used = bc(p.id, eDate, eTime);
+    if(used >= cap){
+      showToast('⚠ 此時段已額滿，請選擇其他時段');
+      showPage('page-e1'); return;
+    }
+  }
+  const name=document.getElementById('e-name').value.trim(), eid=document.getElementById('e-eid').value.trim(), email=document.getElementById('e-email').value.trim();
+  if(!name){alert('請輸入姓名');return;} if(!eid){alert('請輸入員工編號');return;} if(!email||!email.includes('@')){alert('請輸入有效 Email');return;}
+  if(bc(p.id,eDate,eTime)>=cap(p,eDate,eTime)){alert('此時段已額滿，請選擇其他時段');showPage('page-e1');return;}
+  const v = id => document.getElementById(id)?.value || '';
+  const idno = v('e-idno').trim();
+  const b={ id:uid(), pid:p.id, ts:new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei'}),
+    company:p.co, projectName:p.name,
+    name, eid, email, idno,
+    phone: v('e-ph'),
+    dept: v('e-dept'),
+    note: v('e-note'),
+    date: eDate, time: eTime, qSkipped,
+    sq1: solderAnswers.sq1||'', sq2: solderAnswers.sq2||'',
+    confirmMail: '未寄出', reminderMail: '未寄出' };
+  bookings.push(b);
+  const body=fT(p.cfB||dCF(),{name,date:fD(eDate),time:eTime,location:p.loc,company:p.co+' '+p.name});
+  document.getElementById('e-cfp').innerHTML=eHTML(p.cfS||'【體檢預約確認】',body);
+  showPage('page-e3');
+  // 背景同步至 Sheets
+  try { await gsWrite({ action:'saveBooking', data:b }); } catch(e){}
+}
+function resetEmp(){ ['e-name','e-email','e-ph','e-note','e-idno'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; }); document.getElementById('e-dept').value=''; if(curUser?.eid)document.getElementById('e-eid').value=curUser.eid; resetSolderQ(); showEmpHome(); }
+
+/* ══════════════════════════════════════════
+   MODAL / TOAST
+══════════════════════════════════════════ */
+function closeM(id){ document.getElementById(id).classList.remove('open'); }
+function showToast(msg){ let t=document.getElementById('_t'); if(!t){t=document.createElement('div');t.id='_t';t.style.cssText='position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gray-800);color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;';document.body.appendChild(t);} t.textContent=msg;t.style.opacity='1';setTimeout(()=>t.style.opacity='0',2500); }
+
+
+/* ══════════════════════════════════════════
+   背景自動同步（每 30 秒靜默更新一次）
+══════════════════════════════════════════ */
+// 管理員 Token（記憶體儲存，登出/重整就清空）
+let adminToken = null;
+let syncTimer = null;
+let isSyncing = false;
+
+async function silentSync() {
+  if (!GS_URL || isSyncing) return;
+  isSyncing = true;
+  try {
+    // 階段二：根據角色用不同 API
+    let res;
+    if(curUser?.role === 'admin' && adminToken){
+      res = await gsGet('getAdminData&token=' + encodeURIComponent(adminToken));
+      if(res?.code === 'TOKEN_INVALID'){
+        adminToken = null;
+        showToast('⚠ 登入已過期');
+        setTimeout(() => doLogout(), 1500);
+        return;
+      }
+    } else if(curUser?.role === 'employee' && curUser?.eid && curUser?.birthday){
+      res = await gsGet('getEmployeeData&eid=' + encodeURIComponent(curUser.eid) + '&birthday=' + encodeURIComponent(curUser.birthday));
+    } else {
+      return;
+    }
+    if (res?.status === 'ok') {
+      if(res.projects) projects = res.projects;
+      if(res.bookings) bookings = res.bookings;
+      if(res.employees !== undefined) employees = res.employees;
+      if(res.config) config = { ...config, ...res.config };
+    }
+    // 若管理員正在看某個頁面，靜默刷新顯示
+    const activePage = document.querySelector('.page.active')?.id;
+    if (activePage === 'page-bk')    renderBk();
+    if (activePage === 'page-stats') renderStats();
+    if (activePage === 'page-proj')  renderGrid();
+    if (activePage === 'page-emp-list') renderEmpList();
+    // 更新側邊欄預約人數
+    renderList();
+    // 更新員工時段名額（讓員工頁即時看到最新剩餘名額）
+    if (activePage === 'page-e1' && eDate) renderEmpTimes(eDate);
+
+    // 更新右上角同步時間提示
+    const ts = new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    updateSyncBadge(ts);
+  } catch(e) {
+    // 靜默失敗，不顯示錯誤
+  }
+  isSyncing = false;
+}
+
+function startAutoSync(intervalSec) {
+  stopAutoSync();
+  syncTimer = setInterval(silentSync, (intervalSec||30) * 1000);
+}
+
+function stopAutoSync() {
+  if (syncTimer) { clearInterval(syncTimer); syncTimer = null; }
+}
+
+function updateSyncBadge(timeStr) {
+  let badge = document.getElementById('sync-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'sync-badge';
+    badge.style.cssText = 'font-size:11px;color:rgba(255,255,255,.6);';
+    document.querySelector('.topbar-right')?.prepend(badge);
+  }
+  badge.textContent = '🔄 ' + timeStr + ' 同步';
+}
+
+/* ══════════════════════════════════════════
+   START
+══════════════════════════════════════════ */
+appInit();
+</script>
+<datalist id="time-options"><option value="05:00"></option><option value="05:15"></option><option value="05:30"></option><option value="05:45"></option><option value="06:00"></option><option value="06:15"></option><option value="06:30"></option><option value="06:45"></option><option value="07:00"></option><option value="07:15"></option><option value="07:30"></option><option value="07:45"></option><option value="08:00"></option><option value="08:15"></option><option value="08:30"></option><option value="08:45"></option><option value="09:00"></option><option value="09:15"></option><option value="09:30"></option><option value="09:45"></option><option value="10:00"></option><option value="10:15"></option><option value="10:30"></option><option value="10:45"></option><option value="11:00"></option><option value="11:15"></option><option value="11:30"></option><option value="11:45"></option><option value="12:00"></option><option value="12:15"></option><option value="12:30"></option><option value="12:45"></option><option value="13:00"></option><option value="13:15"></option><option value="13:30"></option><option value="13:45"></option><option value="14:00"></option><option value="14:15"></option><option value="14:30"></option><option value="14:45"></option><option value="15:00"></option><option value="15:15"></option><option value="15:30"></option><option value="15:45"></option><option value="16:00"></option><option value="16:15"></option><option value="16:30"></option><option value="16:45"></option><option value="17:00"></option></datalist>
+
+</body></html>
