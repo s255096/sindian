@@ -1738,16 +1738,18 @@ function doAdmLogin(){
   document.getElementById('sidebar').style.display='';
   document.body.classList.remove('emode');
 
-  // 向 GAS 取得 adminToken，供後續寫入操作使用
-  gsGet('adminLogin&user=' + encodeURIComponent(user) + '&pass=' + encodeURIComponent(pass))
+  // 向 GAS 取得 adminToken，供後續寫入操作使用（POST action: adminVerifyLogin）
+  gsPost({ action: 'adminVerifyLogin', user, pass })
     .then(r => {
       if(r && r.token) {
         adminToken = r.token;
+        console.log('[doAdmLogin] adminToken 取得成功');
       } else {
+        console.warn('[doAdmLogin] Token 取得失敗:', r);
         showToast('⚠ 無法取得管理員 Token，儲存功能可能受限');
       }
     })
-    .catch(() => showToast('⚠ 無法連線取得 Token'));
+    .catch(err => { console.error('[doAdmLogin] Token 請求錯誤:', err); showToast('⚠ 無法連線取得 Token'); });
 
   // 資料已在開機時載入完畢，直接渲染
   renderList(); renderGrid();
