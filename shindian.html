@@ -2572,6 +2572,24 @@ async function sendRemindersNow(){
 /* ══════════════════════════════════════════
    STATS
 ══════════════════════════════════════════ */
+// 統一日期正規化：處理 YYYY-MM-DD、ISO字串、Date物件，強制台灣時區（UTC+8）
+function normalizeDate(v) {
+  if (!v) return '';
+  const s = String(v).trim();
+  // 已是 YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // ISO 字串（含時區）或 Date 物件：轉成台灣時間取日期
+  const d = (v instanceof Date) ? v : new Date(s);
+  if (!isNaN(d.getTime())) {
+    const tw = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+    const y = tw.getUTCFullYear();
+    const m = String(tw.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(tw.getUTCDate()).padStart(2, '0');
+    return y + '-' + m + '-' + dd;
+  }
+  return s;
+}
+
 function renderStats(){
   const p=CP(); if(!p)return;
   document.getElementById('st-sub').textContent=p.co+' — '+p.name;
@@ -2594,14 +2612,21 @@ function renderStats(){
   const cont = document.getElementById('st-daily');
   cont.innerHTML='';
 
+  // 預先將所有預約的 date/time 正規化，避免逐筆重複轉換與格式不一致
+  const normalizedBookings = projBookings.map(b => ({
+    ...b,
+    _date: normalizeDate(b.date),
+    _time: fmtTime(b.time) || String(b.time||'').trim()
+  }));
+
   ds.forEach(d => {
     // 取得這天的時段（從 slots 取出，並用 fmtTime 正規化）
     const slotsOfDay = p.slots?.[d] || {};
     const times = Object.keys(slotsOfDay).map(t => fmtTime(t)||t).filter(t=>t).sort();
     if(!times.length) return;
 
-    // 該日總預約人數（用標準化的 date/time 比對）
-    const dc = projBookings.filter(b => (fmtDate(b.date)||b.date) === d).length;
+    // 該日總預約人數（比對已正規化的 _date）
+    const dc = normalizedBookings.filter(b => b._date === d).length;
     const dcap = Object.values(slotsOfDay).reduce((a,s)=>a+(s.cap??p.cap??30),0);
     const pct = dcap?Math.round(dc/dcap*100):0;
     const fc = pct>=90?'var(--red-400)':pct>=60?'var(--amber-400)':'var(--teal-400)';
@@ -2610,9 +2635,9 @@ function renderStats(){
     const timesHtml = times.map(t => {
       const origKey = Object.keys(slotsOfDay).find(k => (fmtTime(k)||k)===t) || t;
       const cap = slotsOfDay[origKey]?.cap ?? p.cap ?? 30;
-      const used = projBookings.filter(b =>
-        (fmtDate(b.date)||b.date)===d &&
-        (fmtTime(b.time)||b.time)===t
+      const used = normalizedBookings.filter(b =>
+        b._date === d &&
+        b._time === t
       ).length;
       const rem = cap - used;
       const tpct = cap ? Math.round(used/cap*100) : 0;
