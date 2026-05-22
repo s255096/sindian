@@ -4,7 +4,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>新店耕莘醫院 巡檢中心體檢預約系統</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="./新店耕莘醫院 巡檢中心體檢預約系統_files/xlsx.full.min.js.下載"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Serif+Display&display=swap');
 :root{
@@ -1737,6 +1737,18 @@ function doAdmLogin(){
   document.getElementById('ubrole').textContent='管理員';
   document.getElementById('sidebar').style.display='';
   document.body.classList.remove('emode');
+
+  // 向 GAS 取得 adminToken，供後續寫入操作使用
+  gsGet('adminLogin&user=' + encodeURIComponent(user) + '&pass=' + encodeURIComponent(pass))
+    .then(r => {
+      if(r && r.token) {
+        adminToken = r.token;
+      } else {
+        showToast('⚠ 無法取得管理員 Token，儲存功能可能受限');
+      }
+    })
+    .catch(() => showToast('⚠ 無法連線取得 Token'));
+
   // 資料已在開機時載入完畢，直接渲染
   renderList(); renderGrid();
   if(projects.length){
